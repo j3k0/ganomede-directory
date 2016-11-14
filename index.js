@@ -17,8 +17,8 @@ const master = () => {
     logger.info('Master stopping…');
     running = false;
 
-    // Forcefully exit if workers hang around for too long
-    setTimeout(process.exit.bind(process,0), 10000).unref();
+    // Forcefully exit if workers hang for too long
+    setTimeout(process.exit.bind(process,0), 30e3).unref();
   });
 
   logger.info('Parsed config', config);
