@@ -1,0 +1,38 @@
+{
+  "name": "ganomede-wordsaxe",
+  "version": "0.0.1",
+  "api": "wordsaxe/v1",
+  "description": "wordsaxe rules microservice",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "startw": "nodemon --watch src/ --watch index.js --watch config.js --exec \"npm start\"",
+    "test": "mocha --bail --no-exit --throw-deprecation tests/*.test.js",
+    "testw": "nodemon --watch src/ --watch tests/ --watch config.js --exec \"npm test\"",
+    "lint": "eslint src/ tests/ index.js config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/j3k0/ganomede-wordsaxe.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Trade Secret",
+  "private": true,
+  "bugs": {
+    "url": "https://github.com/j3k0/ganomede-wordsaxe/issues"
+  },
+  "homepage": "https://github.com/j3k0/ganomede-wordsaxe#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "eslint": "^3.8.0",
+    "mocha": "^3.1.2",
+    "supertest": "^2.0.0"
+  },
+  "dependencies": {
+    "async": "^2.1.2",
+    "bunyan": "^1.8.1",
+    "curtain-down": "^1.0.0",
+    "restify": "^4.1.1"
+  }
+}
