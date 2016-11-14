@@ -16,6 +16,9 @@ const master = () => {
   curtain.on(() => {
     logger.info('Master stopping…');
     running = false;
+
+    // Forcefully exit if workers hang around for too long
+    setTimeout(process.exit.bind(process,0), 10000).unref();
   });
 
   logger.info('Parsed config', config);
