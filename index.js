@@ -14,22 +14,27 @@ const master = () => {
   let running = true;
 
   curtain.on(() => {
-    logger.info('Master stopping…');
+    if (!running) {
+      logger.info('aaaaaarghhhhh...');
+      return process.exit(1);
+    }
+
+    logger.info('master stopping…');
     running = false;
 
     // Forcefully exit if workers hang for too long
     setTimeout(process.exit.bind(process,0), 30e3).unref();
   });
 
-  logger.info('Parsed config', config);
+  logger.info(config, 'parsed config');
 
   cluster.fork();
 
   cluster.on('disconnect', (worker) => {
-    logger.info('Worker disconnected');
+    logger.info('worker disconnected');
 
     if (running) {
-      logger.error('Restarting…');
+      logger.error('restarting…');
       cluster.fork();
     }
   });
@@ -39,7 +44,7 @@ const child = () => {
   const server = createServer();
 
   curtain.on(() => {
-    logger.info('Worker stopping…');
+    logger.info('worker stopping…');
 
     async.parallel([
       (cb) => server.close(cb),
@@ -51,7 +56,7 @@ const child = () => {
 
   server.listen(config.http.port, config.http.host, () => {
     const {port, family, address} = server.address();
-    logger.info('Ready at %s:%d (%s)', address, port, family);
+    logger.info('ready at %s:%d (%s)', address, port, family);
   });
 
   // Handle uncaughtException, kill the worker.
@@ -78,8 +83,7 @@ const child = () => {
       res.send(new restify.InternalError(message));
     }
     catch (err2) {
-      logger.error('Error sending 500!');
-      logger.error(err2);
+      logger.error(err2, 'error sending 500!');
     }
   });
 };

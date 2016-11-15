@@ -9,6 +9,12 @@ module.exports = () => {
     log: logger
   });
 
+  const requestLogger = (req, res, next) => {
+    req.log.info({ req_id:req.id() }, `${req.method} ${req.url}`);
+    next();
+  };
+  server.use(requestLogger);
+
   server.use(restify.queryParser());
   server.use(restify.bodyParser());
 
