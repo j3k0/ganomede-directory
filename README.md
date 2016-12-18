@@ -163,7 +163,7 @@ There cannot be more than 1 match (because user ids are globally unique).
 {
     "id": "hrry23",
     "aliases": {
-        "name", "Harry"
+        "name": "Harry"
     }
 }
 ```
@@ -237,9 +237,9 @@ There cannot be more than 1 match (auth tokens are globally unique).
 {
     "id": "hrry23",
     "aliases": {
-        "name", "Harry",
+        "name": "Harry",
         "email": "harry123@email.com",
-        "facebook", "12012484843"
+        "facebook": "12012484843"
     }
 }
 ```
@@ -261,7 +261,7 @@ There cannot be more than 1 match (aliases are contrained to be globally unique)
 {
     "user_id": "hrry23",
     "aliases": {
-        "name", "Harry"
+        "name": "Harry"
     }
 }
 ```
