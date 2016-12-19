@@ -23,7 +23,7 @@ const master = () => {
     running = false;
 
     // Forcefully exit if workers hang for too long
-    setTimeout(process.exit.bind(process,0), 30e3).unref();
+    setTimeout(process.exit.bind(process, 0), 30e3).unref();
   });
 
   logger.info(config, 'parsed config');

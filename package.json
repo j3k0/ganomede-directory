@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node index.js",
     "startw": "nodemon --watch src/ --watch index.js --watch config.js --exec \"npm start\"",
-    "test": "mocha --bail --no-exit --throw-deprecation tests/*.test.js",
+    "test": "BUNYAN_LEVEL=ERROR mocha --bail --no-exit --throw-deprecation tests/*.test.js",
     "testw": "nodemon --watch src/ --watch tests/ --watch config.js --exec \"npm test\"",
     "lint": "eslint src/ tests/ index.js config.js"
   },
@@ -33,6 +33,7 @@
     "async": "^2.1.2",
     "bunyan": "^1.8.1",
     "curtain-down": "^1.0.0",
+    "lodash": "^4.17.2",
     "restify": "^4.1.1"
   }
 }

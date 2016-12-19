@@ -10,7 +10,7 @@ module.exports = () => {
   });
 
   const requestLogger = (req, res, next) => {
-    req.log.info({ req_id:req.id() }, `${req.method} ${req.url}`);
+    req.log.info({req_id: req.id()}, `${req.method} ${req.url}`);
     next();
   };
   server.use(requestLogger);
@@ -19,10 +19,10 @@ module.exports = () => {
   server.use(restify.bodyParser());
 
   // Audit requests
-  server.on('after', restify.auditLogger({ log: logger }));
+  server.on('after', restify.auditLogger({log: logger}));
 
   // Automatically add a request-id to the response
-  function setRequestId(req, res, next) {
+  function setRequestId (req, res, next) {
     res.setHeader('x-request-id', req.id());
     return next();
   }
