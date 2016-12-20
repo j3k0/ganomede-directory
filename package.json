@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node index.js",
     "startw": "nodemon --watch src/ --watch index.js --watch config.js --exec \"npm start\"",
-    "test": "BUNYAN_LEVEL=ERROR mocha --bail --no-exit --throw-deprecation tests/*.test.js",
+    "test": "BUNYAN_LEVEL=ERROR mocha --bail --no-exit --throw-deprecation 'tests/*.test.js'",
     "testw": "nodemon --watch src/ --watch tests/ --watch config.js --exec \"npm test\"",
     "lint": "eslint src/ tests/ index.js config.js"
   },
