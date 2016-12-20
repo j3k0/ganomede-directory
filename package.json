@@ -1,8 +1,8 @@
 {
-  "name": "ganomede-wordsaxe",
+  "name": "ganomede-directory",
   "version": "0.0.1",
-  "api": "wordsaxe/v1",
-  "description": "wordsaxe rules microservice",
+  "api": "directory/v1",
+  "description": "directory of users microservice",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -13,16 +13,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/j3k0/ganomede-wordsaxe.git"
+    "url": "git+https://github.com/j3k0/ganomede-directory.git"
   },
   "keywords": [],
   "author": "",
   "license": "Trade Secret",
   "private": true,
   "bugs": {
-    "url": "https://github.com/j3k0/ganomede-wordsaxe/issues"
+    "url": "https://github.com/j3k0/ganomede-directory/issues"
   },
-  "homepage": "https://github.com/j3k0/ganomede-wordsaxe#readme",
+  "homepage": "https://github.com/j3k0/ganomede-directory#readme",
   "devDependencies": {
     "chai": "^3.5.0",
     "eslint": "^3.8.0",

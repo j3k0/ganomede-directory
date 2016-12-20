@@ -29,7 +29,7 @@ const parseLogLevel = (envValue) => {
 };
 
 module.exports = {
-  name: 'wordsaxe',
+  name: pkg.name,
   logLevel: parseLogLevel(process.env.BUNYAN_LEVEL),
 
   http: {
