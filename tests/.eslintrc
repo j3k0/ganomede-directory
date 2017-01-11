@@ -1,2 +1,6 @@
 env:
   mocha: true
+
+globals:
+  td: false
+  expect: false
