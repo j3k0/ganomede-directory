@@ -16,10 +16,17 @@ describe('CreateUserDocument', () => {
       .thenCallback(null, 'hashed-pwd');
 
     td.when(db.save('id:jdoe', {id: 'jdoe', hash: 'hashed-pwd'}, td.callback))
-      .thenCallback(null);
+      .thenCallback(null, {ok: true, id: 'id:jdoe', rev: 'revision'});
 
-    new CreateUserDocument(db, 'jdoe', 'pwd').execute((err) => {
+    const action = new CreateUserDocument(db, 'jdoe', 'pwd');
+
+    action.execute((err) => {
       expect(err).to.be.null;
+      expect(action.result).to.eql({
+        ok: true,
+        id: 'id:jdoe',
+        rev: 'revision'
+      });
       done();
     });
   });
