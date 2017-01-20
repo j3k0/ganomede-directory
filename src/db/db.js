@@ -14,6 +14,13 @@ class DB {
     throw new Error('NotImplemented');
   }
 
+  delete (docId, docRevision, callback) {
+    throw new Error('NotImplemented');
+  }
+
+  // TODO
+  // following stuff isn't used anymore, don't forget to delete it.
+
   saveMulti (idToBodyObject, callback) {
     const operations = lodash.map(idToBodyObject, (docBody, docId) => {
       return [docId, docBody];

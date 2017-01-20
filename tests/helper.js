@@ -3,10 +3,10 @@
 const td = require('testdouble');
 const {expect} = require('chai');
 
-// td.print
-// setImmediate(() => {
-//         console.log('%s', td.explain(db.save).description)
-//       })
+td.print = (what) => {
+  const message = td.explain(what).description;
+  console.log('%s', message); // eslint-disable-line no-console
+};
 
 global.td = td;
 global.expect = expect;
