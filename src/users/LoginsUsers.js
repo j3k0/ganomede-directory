@@ -1,6 +1,13 @@
 'use strict';
 
 class LoginsUsers {
+  // TODO:
+  // interesting, feels pretty wierd, error-prone, maybe look into better arch…).
+  constructor (db, authdb) {
+    this.db = db;
+    this.authdb = authdb;
+  }
+
   // callback(err, hashString)
   hashPassword (password, callback) {
     throw new Error('NotImplemented');

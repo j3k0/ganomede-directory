@@ -1,9 +1,9 @@
 'use strict';
 
-const ActionExecutor = require('../src/ActionExecutor');
+const ActionsExecutor = require('../src/ActionsExecutor');
 
-describe('ActionExecutor', () => {
-  describe('#execute()', () => {
+describe('ActionsExecutor', () => {
+  describe('#run()', () => {
     class TestAction {
       constructor (resultsRef, num) {
         this.resultsRef = resultsRef;
@@ -29,7 +29,7 @@ describe('ActionExecutor', () => {
 
     it('Runs actions one by one', (done) => {
       const results = [];
-      const executor = new ActionExecutor([
+      const executor = new ActionsExecutor([
         new TestAction(results, 1),
         new TestAction(results, 2),
         new TestAction(results, 3)
@@ -44,7 +44,7 @@ describe('ActionExecutor', () => {
 
     it('Reverts previous actions if some fail', (done) => {
       const results = [];
-      const executor = new ActionExecutor([
+      const executor = new ActionsExecutor([
         new TestAction(results, 1),
         new TestAction(results, 2),
         new FailingAction()

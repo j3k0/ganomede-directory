@@ -1,63 +1,42 @@
 'use strict';
 
-const async = require('async');
 const LoginsUsers = require('./LoginsUsers');
-const DB = require('../db/db');
-const config = require('../../config');
-
-// callback(err, docId, docBody)
-const createUserDoc = (id, password, callback) => {
-  new LoginsUsers().hashPassword(password, (err, hash) => {
-    if (err)
-      return callback(err);
-
-    callback(null, {id, hash});
-  });
-};
-
-// callback(err, docId2docBodyMap)
-const createAliasesDocs = (id, aliases, creationDate, callback) => {
-  const docs = {};
-
-  aliases.forEach(alias => {
-    const docId = `alias:${alias.type}:${alias.value}`;
-    const docBody = {
-      id,
-      date: creationDate,
-      public: alias.public === true
-    };
-
-    docs[docId] = docBody;
-  });
-
-  setImmediate(callback, null, docs);
-};
+const actions = require('../actions');
+const ActionsExecutor = require('../ActionsExecutor');
 
 class CreatesUsers {
-  create (id, password, aliases, creationDate, callback) {
-    const db = new DB(config.couch);
+  constructor (db, authdb) {
+    this.db = db;
+    this.authdb = authdb;
+  }
 
-    async.parallel({
-      userDoc: (cb) => createUserDoc(id, password, cb),
-      aliasesDocs: (cb) => createAliasesDocs(id, aliases, creationDate, cb)
-    }, (err, {userDoc, aliasesDocs} = {}) => {
+  create (userId, password, aliases, callback) {
+    // TODO
+    // validate stuff here?
+    // const valid = validateUserId() && validatePassword() && validateAliases();
+    const now = new Date();
+    const steps = [
+      new actions.CreateUserDocument(this.db, userId, password),
+      ...aliases.map(alias => new actions.CreateAliasDocument(this.db, userId, {
+        type: alias.type,
+        value: alias.value,
+        date: now,
+        public: alias.public === true
+      }))
+    ];
+
+    new ActionsExecutor(steps).run((err) => {
       if (err)
-        return callback(err);
+        return callback(err); // TODO: detect what an error is: hashing, doc creation, 409
 
-      // TODO:
-      // must check all the docs are inserted
-      // must know that no aliases are 409
-      async.parallel([
-        (cb) => db.save(`id:${id}`, userDoc, cb),
-        (cb) => db.saveMulti(aliasesDocs, cb)
-      ], (err) => {
+      new LoginsUsers(this.db, this.authdb).createToken(userId, (err, token) => {
         if (err)
-          return callback(err);
+          return callback(err); // TODO: account created, but failed to login
+                                // should be distinct from failed to create account.
 
-        new LoginsUsers().createToken(id, (err, token) => {
-          return err
-            ? callback(err)
-            : callback(null, {id, token});
+        callback(null, {
+          id: userId,
+          token
         });
       });
     });

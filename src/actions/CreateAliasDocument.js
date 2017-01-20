@@ -13,7 +13,7 @@ class CreateAliasDocument {
     const docBody = {
       id: this.userId,
       date: this.alias.date,
-      public: this.alias.public === true
+      public: this.alias.public
     };
 
     this.db.save(docId, docBody, (err, response) => {

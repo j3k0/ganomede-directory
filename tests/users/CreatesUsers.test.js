@@ -3,64 +3,34 @@
 describe('CreatesUsers', () => {
   let CreatesUsers;
   let LoginsUsers;
-  let DB;
+  let ActionsExecutor;
 
   beforeEach(() => {
-    DB = td.replace('../../src/db/db');
+    ActionsExecutor = td.replace('../../src/ActionsExecutor');
     LoginsUsers = td.replace('../../src/users/LoginsUsers');
     CreatesUsers = require('../../src/users/CreatesUsers');
   });
 
-  it('does work or something', (done) => {
-    const id = 'jdoe';
+  it('Creates Couch documents and Authdb token', (done) => {
+    const userId = 'jdoe';
     const password = 'qwerty';
     const aliases = [
       {type: 'email', value: 'jdoe@example.com'},
       {type: 'name', value: 'jdoe', public: true}
     ];
 
-    const now = new Date();
-
-    const expectedUserDoc = {
-      id,
-      hash: 'password-hash'
-    };
-
-    const expectedAliasDocs = [
-      {
-        id,
-        date: now,
-        public: false
-      },
-
-      {
-        id,
-        date: now,
-        public: true
-      }
-    ];
-
-    // hash password
-    // save user doc
-    // save aliases docs
-    // created access token
-
-    td.when(LoginsUsers.hashPassword(password, td.callback))
-      .thenCallback(null, 'password-hash');
-
-    td.when(DB.save(`id:${id}`, td.matchers.anything(), td.callback))
-      .thenCallback(null, expectedUserDoc);
-
-    td.when(DB.saveMulti({
-      'alias:email:jdoe@example.com': expectedAliasDocs[0],
-      'alias:name:jdoe': expectedAliasDocs[1]
-    }, td.callback))
+    // TODO
+    // Meh… we probably want to check actions
+    // that are about to be ran, not the call to #run() itself.
+    // Maybe move out creation of steps for ActionExecutor
+    // into separate function and test its results.
+    td.when(ActionsExecutor.run(td.callback))
       .thenCallback(null);
 
-    td.when(LoginsUsers.createToken(id, td.callback))
+    td.when(LoginsUsers.createToken('jdoe', td.callback))
       .thenCallback(null, 'auth-token');
 
-    new CreatesUsers().create(id, password, aliases, now, (err, {id, token} = {}) => {
+    new CreatesUsers().create(userId, password, aliases, (err, {id, token} = {}) => {
       expect(err).to.be.null;
       expect(id).to.equal('jdoe');
       expect(token).to.equal('auth-token');

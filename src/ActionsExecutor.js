@@ -4,7 +4,7 @@ const async = require('async');
 
 // Pass in array of actions, #run() to execute them in series,
 // If one fails, calls action.rollback() on previous ones in reverse order.
-class ActionExecutor {
+class ActionsExecutor {
   constructor (actions) {
     this.actions = actions;
   }
@@ -43,4 +43,4 @@ class ActionExecutor {
   }
 }
 
-module.exports = ActionExecutor;
+module.exports = ActionsExecutor;
