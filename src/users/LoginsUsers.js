@@ -1,5 +1,9 @@
 'use strict';
 
+const async = require('async');
+const uuid4 = require('uuid/v4');
+const pbkdf = require('password-hash-and-salt');
+
 class LoginsUsers {
   // TODO:
   // interesting, feels pretty wierd, error-prone, maybe look into better arch…).
@@ -10,20 +14,39 @@ class LoginsUsers {
 
   // callback(err, hashString)
   hashPassword (password, callback) {
-    throw new Error('NotImplemented');
+    pbkdf(password).hash(callback);
   }
 
+  // callback(err, authTokenString)
   createToken (userId, callback) {
-    throw new Error('NotImplemented');
+    const token = uuid4();
+
+    this.authdb.addAccount(token, userId, (err) => {
+      return err
+        ? callback(err)
+        : callback(null, token);
+    });
   }
 
   // callback(err, authtoken)
   login (userId, password, callback) {
-    throw new Error('NotImplemented');
-    // const docId = id;
-    // db.getDocument(docId, ({hash}) => {
-    //   pbkdf.verify(password, hash, callback);
-    // });
+    async.waterfall([
+      (cb) => this.db.get(`id:${userId}`, cb),
+      (userDoc, cb) => pbkdf(password).verifyAgainst(userDoc.hash, cb),
+      (matches, cb) => {
+        return matches
+          ? this.createToken(userId, cb)
+          : cb(new Error('InvalidPassword'));
+      }
+    ], (err, token) => {
+      // TODO
+      // we'll need to distinguish between:
+      //   - user missing or password does not match
+      //   - db error, hashing error, etc
+      return err
+        ? callback(err)
+        : callback(null, token);
+    });
   }
 }
 
