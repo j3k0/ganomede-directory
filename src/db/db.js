@@ -12,6 +12,8 @@ class DB {
     this.db = nano(url).use(name);
   }
 
+  // TODO:
+  // missing doc should probably be an error, code in other places depends on it
   get (id, callback) {
     throw new Error('NotImplemented');
   }
@@ -21,6 +23,12 @@ class DB {
   }
 
   delete (docId, docRevision, callback) {
+    throw new Error('NotImplemented');
+  }
+
+  // TODO
+  // document must have _id, _rev
+  replace (document, callback) {
     throw new Error('NotImplemented');
   }
 
