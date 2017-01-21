@@ -11,11 +11,6 @@ module.exports = {
   views: {
     // Basically, this emits all the docs we have on user,
     // then list function aggregates them into profile object.
-    //
-    // TODO
-    //
-    // (move under `views`)
-    //
     // Probably worth rethinking what we emit here,
     // but it doesn't seem like a big deal right now, so…
     rawProfiles: {

@@ -40,8 +40,15 @@ module.exports = {
     prefix: `/${pkg.api}`
   },
 
-  data: {
-    host: process.env.DATA_PORT_8080_TCP_ADDR || '127.0.0.1',
-    port: parseInt(process.env.DATA_PORT_8080_TCP_PORT, 10) || 8080
+  couch: {
+    url: (function () {
+      const host = process.env.COUCH_DIRECTORY_PORT_5984_TCP_ADDR || 'localhost';
+      const port = parseInt(process.env.COUCH_DIRECTORY_PORT_5984_TCP_PORT, 10) || 5984;
+      return `http://${host}:${port}/`;
+    }()),
+    name: process.env.COUCH_NAME || 'ganomede_directory_test'
   }
 };
+
+if (!module.parent)
+  require('./src/utils').debugPrint(module.exports);

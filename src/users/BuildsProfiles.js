@@ -1,10 +1,10 @@
 'use strict';
 
-// const Profile = require('./Profile');
+const Profile = require('./Profile');
 
 class BuildsProfiles {
-  constructor () {
-
+  constructor (db) {
+    this.db = db;
   }
 
   // Give userId, receive user profile object that can be sent back.
@@ -13,7 +13,11 @@ class BuildsProfiles {
   // TODO
   // Need options for something like which aliases to include (public / all), etc.
   build (userId, callback) {
-    throw new Error('NotImplemented');
+    this.db.list('rawProfiles', 'profiles', {key: userId}, (err, json) => {
+      return err
+        ? callback(err)
+        : callback(null, new Profile(json.id, json.hash, json.aliases));
+    });
   }
 }
 

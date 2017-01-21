@@ -2,9 +2,15 @@
 
 const async = require('async');
 const lodash = require('lodash');
+const nano = require('nano');
+
+const DESIGN = 'users';
 
 class DB {
-  constructor () {}
+  // new DB(config.couch)
+  constructor ({url, name}) {
+    this.db = nano(url).use(name);
+  }
 
   get (id, callback) {
     throw new Error('NotImplemented');
@@ -17,6 +23,19 @@ class DB {
   delete (docId, docRevision, callback) {
     throw new Error('NotImplemented');
   }
+
+  // fetch _lists/<listname>/<viewname> with qs
+  list (viewname, listname, qs, callback) {
+    throw new Error('NotImplemented');
+
+    // db.viewWithList(DESIGN, viewname, listname, qs, (err, body) => {
+
+    // });
+  }
+
+  // listItem () {
+  //   // http://localhost:5984/contrasstest/_design/users/_list/profiles/rawProfiles?key="alice"
+  // }
 
   // TODO
   // following stuff isn't used anymore, don't forget to delete it.

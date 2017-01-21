@@ -18,8 +18,9 @@ The microservice allows to manage users:
 Configuration
 -------------
 
- * `COUCH_DIRECTORY_PORT_5984_TCP_ADDR` - IP of the directory couchdb
- * `COUCH_DIRECTORY_PORT_5984_TCP_PORT` - Port of the directory couchdb
+ * `COUCH_NAME` — name of couch database, defaults to `'ganomede_directory_test'`;
+ * `COUCH_DIRECTORY_PORT_5984_TCP_ADDR` - IP of the directory couchdb, defaults to `'localhost'`;
+ * `COUCH_DIRECTORY_PORT_5984_TCP_PORT` - Port of the directory couchdb, defaults to `5984`;
  * `REDIS_AUTH_PORT_6379_TCP_ADDR` - IP of the AuthDB redis
  * `REDIS_AUTH_PORT_6379_TCP_PORT` - Port of the AuthDB redis
  * `API_SECRET` - Give access to private APIs
