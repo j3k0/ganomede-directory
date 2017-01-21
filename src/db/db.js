@@ -18,6 +18,11 @@ class DB {
     throw new Error('NotImplemented');
   }
 
+  // Same as #get(), but missing docs are not error and null instead
+  nullableGet (id, callback) {
+    throw new Error('NotImplemented');
+  }
+
   save (id, body, callback) {
     throw new Error('NotImplemented');
   }
