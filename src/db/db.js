@@ -1,74 +1,152 @@
 'use strict';
 
 const async = require('async');
-const lodash = require('lodash');
 const nano = require('nano');
+const {BaseError} = require('../errors');
 
-const DESIGN = 'users';
+class DocumentNotFoundError extends BaseError {
+  constructor (_id, _rev) {
+    super('Document not found %j', {_id, _rev});
+  }
 
-class DB {
+  static matches (nanoError) {
+    return nanoError && nanoError.request && (nanoError.statusCode === 404) &&
+      ((nanoError.request.method === 'HEAD') // HEAD request have no body,
+        ? true                               // so nano doesn't fill error fields.
+        : (nanoError.error === 'not_found'));
+  }
+}
+
+class RevisionMismatchError extends BaseError {
+  constructor (_id, _rev) {
+    super('Revision mismatch %j', {_id, _rev});
+  }
+
+  static matches (nanoError) {
+    return nanoError && (nanoError.statusCode === 409) && (nanoError.error === 'conflict');
+  }
+}
+
+class Db {
   // new DB(config.couch)
   constructor ({url, name}) {
     this.db = nano(url).use(name);
   }
 
-  // TODO:
-  // missing doc should probably be an error, code in other places depends on it
-  get (id, callback) {
-    throw new Error('NotImplemented');
+  // Get doc by its id. Special errors:
+  //  - DocumentNotFoundError when doc is missing.
+  //
+  // callback(err, doc)
+  get (docId, callback) {
+    this.db.get(docId, (err, body, headers) => {
+      if (DocumentNotFoundError.matches(err))
+        return callback(new DocumentNotFoundError(docId));
+
+      if (err)
+        return callback(err);
+
+      callback(null, body);
+    });
   }
 
-  // Same as #get(), but missing docs are not error and null instead
-  nullableGet (id, callback) {
-    throw new Error('NotImplemented');
+  // Same as #get(), but missing docs are callback(null, null) instead.
+  //
+  // callback(err, doc|null)
+  nullableGet (docId, callback) {
+    this.get(docId, (err, doc) => {
+      if (err && err instanceof DocumentNotFoundError)
+        return callback(null, null);
+
+      if (err)
+        return callback(err);
+
+      callback(null, doc);
+    });
   }
 
-  save (id, body, callback) {
-    throw new Error('NotImplemented');
+  // Insert new document to couch, special errors:
+  //  - RevisionMismatchError when doc already exists.
+  //
+  // callback(err, couchReply) // couch reply is {ok, id, rev}
+  save (docId, body, callback) {
+    if (body.hasOwnProperty('_id') || body.hasOwnProperty('_rev')) {
+      const error = new Error('You are trying to insert document that contains `_id` and/or `_rev` fields; use replace() to update documents');
+      return setImmediate(callback, error);
+    }
+
+    this.db.insert(body, docId, (err, reply) => {
+      if (RevisionMismatchError.matches(err))
+        return callback(new RevisionMismatchError(docId), reply);
+
+      if (err)
+        return callback(err);
+
+      callback(null, reply);
+    });
   }
 
+  // Hard delete document revision (removes body leaving only _id, _rev, _deleted).
+  // Missing documents are treated as deleted, but `couchReply` will be null.
+  //
+  // callback(null, couchReply|null) // couch reply is {ok, id, rev}
   delete (docId, docRevision, callback) {
-    throw new Error('NotImplemented');
+    this.db.destroy(docId, docRevision, (err, reply) => {
+      if (DocumentNotFoundError.matches(err))
+        return callback(null, null);
+
+      if (err)
+        return callback(err);
+
+      callback(null, reply);
+    });
   }
+
+  // Updated existing document as per docBody (must have _id, _rev).
 
   // TODO
-  // document must have _id, _rev
-  replace (document, callback) {
-    throw new Error('NotImplemented');
+  // replaceing missing doc?..
+  replace (docBody, callback) {
+    const hasIdRev = docBody.hasOwnProperty('_id') && docBody.hasOwnProperty('_rev');
+    if (!hasIdRev)
+      return setImmediate(callback, new Error('Missing `_id` and/or `_rev` fields; use save() for new documents.'));
+
+    async.waterfall([
+      (cb) => this.db.head(docBody._id, (err, _, headers) => {
+        if (DocumentNotFoundError.matches(err))
+          return cb(new DocumentNotFoundError(docBody._id));
+
+        return err
+          ? cb(err)
+          : cb(null);
+      }),
+
+      (cb) => this.db.insert(docBody, cb)
+    ], (err, reply, headers) => {
+      if (RevisionMismatchError.matches(err))
+        return callback(new RevisionMismatchError(docBody._id, docBody._rev));
+
+      return err
+        ? callback(err)
+        : callback(null, reply);
+    });
   }
 
   // fetch _lists/<listname>/<viewname> with qs
-  list (viewname, listname, qs, callback) {
-    throw new Error('NotImplemented');
-
-    // db.viewWithList(DESIGN, viewname, listname, qs, (err, body) => {
-
-    // });
-  }
-
-  // listItem () {
-  //   // http://localhost:5984/contrasstest/_design/users/_list/profiles/rawProfiles?key="alice"
-  // }
-
+  //
+  // callback(err, reply)
+  //
   // TODO
-  // following stuff isn't used anymore, don't forget to delete it.
-
-  saveMulti (idToBodyObject, callback) {
-    const operations = lodash.map(idToBodyObject, (docBody, docId) => {
-      return [docId, docBody];
+  // awkward, probably redo this.
+  list (viewname, listname, qs, callback) {
+    this.db.viewWithList('users', viewname, listname, qs, (err, body, headers) => {
+      return err
+        ? callback(err)
+        : callback(null, body);
     });
-
-    async.each(
-      operations,
-      ([id, body], cb) => this.save(id, body, cb),
-      callback
-    );
-  }
-
-  // he?..
-  replace (oldDoc, newDoc, callback) {
-    throw new Error('NotImplemented');
   }
 }
 
-module.exports = DB;
+Db.DocumentNotFoundError = DocumentNotFoundError;
+Db.RevisionMismatchError = RevisionMismatchError;
+
+module.exports = Db;
