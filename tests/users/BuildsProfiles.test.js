@@ -12,7 +12,7 @@ describe('BuildsProfiles', () => {
 
     new BuildsProfiles(db).build('joe', (err, profile) => {
       expect(err).to.be.null;
-      expect(profile).to.eql(new Profile('joe', 'hash', []));
+      expect(profile).to.eql(new Profile({id: 'joe', hash: 'hash', aliases: []}));
       done();
     });
   });

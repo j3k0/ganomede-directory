@@ -16,7 +16,7 @@ class BuildsProfiles {
     this.db.list('rawProfiles', 'profiles', {key: userId}, (err, json) => {
       return err
         ? callback(err)
-        : callback(null, new Profile(json.id, json.hash, json.aliases));
+        : callback(null, new Profile(json));
     });
   }
 }
