@@ -2,6 +2,8 @@
 
 const async = require('async');
 const LoginsUsers = require('./LoginsUsers');
+const Db = require('../db/db');
+const {UserNotFoundError} = require('../errors');
 
 class ChangesPasswords {
   constructor (db) {
@@ -17,6 +19,9 @@ class ChangesPasswords {
 
   change (userId, newPassword, callback) {
     this._prepare(userId, newPassword, (err, result) => {
+      if (err instanceof Db.DocumentNotFoundError)
+        return callback(new UserNotFoundError(userId));
+
       if (err)
         return callback(err);
 

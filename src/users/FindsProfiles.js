@@ -5,6 +5,7 @@
 
 const async = require('async');
 const BuildsProfiles = require('./BuildsProfiles');
+const {InvalidAuthTokenError} = require('../errors');
 
 class FindsProfiles {
   constructor (db, authdb) {
@@ -23,7 +24,7 @@ class FindsProfiles {
       (userId, cb) => {
         return userId
           ? this.byUserId(userId, cb)
-          : cb(new Error('NotFound'));
+          : cb(new InvalidAuthTokenError());
       }
     ], callback);
   }

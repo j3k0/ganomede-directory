@@ -4,6 +4,7 @@ const async = require('async');
 const LoginsUsers = require('../users/LoginsUsers');
 const {UserAlreadyExistsError} = require('../errors');
 const BaseAction = require('./BaseAction');
+const Db = require('../db/db');
 
 class CreateUserDocument extends BaseAction {
   constructor (db, userId, password) {
@@ -39,6 +40,9 @@ class CreateUserDocument extends BaseAction {
         };
 
         this.db.save(docId, docBody, (err, response) => {
+          if (err instanceof Db.RevisionMismatchError)
+            return callback(new UserAlreadyExistsError(this.userId));
+
           if (err)
             return cb(err);
 

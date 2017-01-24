@@ -1,6 +1,7 @@
 'use strict';
 
 const Profile = require('./Profile');
+const {UserNotFoundError} = require('../errors');
 
 class BuildsProfiles {
   constructor (db) {
@@ -9,14 +10,15 @@ class BuildsProfiles {
 
   // Give userId, receive user profile object that can be sent back.
   // callback(err, profile)
-  //
-  // TODO
-  // Need options for something like which aliases to include (public / all), etc.
   build (userId, callback) {
     this.db.list('rawProfiles', 'profiles', {key: userId}, (err, json) => {
-      return err
-        ? callback(err)
-        : callback(null, new Profile(json));
+      if (err)
+        return callback(err);
+
+      if (json.id === null)
+        return callback(new UserNotFoundError(userId));
+
+      callback(null, new Profile(json));
     });
   }
 }

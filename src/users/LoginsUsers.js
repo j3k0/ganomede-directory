@@ -3,10 +3,10 @@
 const async = require('async');
 const uuid4 = require('uuid/v4');
 const pbkdf = require('password-hash-and-salt');
+const Db = require('../db/db');
+const {UserNotFoundError, InvalidCredentialsError} = require('../errors');
 
 class LoginsUsers {
-  // TODO:
-  // interesting, feels pretty wierd, error-prone, maybe look into better arch…).
   constructor (db, authdb) {
     this.db = db;
     this.authdb = authdb;
@@ -36,16 +36,16 @@ class LoginsUsers {
       (matches, cb) => {
         return matches
           ? this.createToken(userId, cb)
-          : cb(new Error('InvalidPassword'));
+          : cb(new InvalidCredentialsError());
       }
     ], (err, token) => {
-      // TODO
-      // we'll need to distinguish between:
-      //   - user missing or password does not match
-      //   - db error, hashing error, etc
-      return err
-        ? callback(err)
-        : callback(null, token);
+      if (err instanceof Db.DocumentNotFoundError)
+        return callback(new UserNotFoundError(userId));
+
+      if (err)
+        return callback(err);
+
+      callback(null, token);
     });
   }
 }

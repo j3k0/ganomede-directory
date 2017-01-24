@@ -10,10 +10,8 @@ class CreatesUsers {
     this.authdb = authdb;
   }
 
+  // callback(err, {id, token})
   create (userId, password, aliases, callback) {
-    // TODO
-    // validate stuff here?
-    // const valid = validateUserId() && validatePassword() && validateAliases();
     const now = new Date();
     const steps = [
       new actions.CreateUserDocument(this.db, userId, password),
@@ -27,12 +25,11 @@ class CreatesUsers {
 
     new ActionsExecutor(steps).run((err) => {
       if (err)
-        return callback(err); // TODO: detect what an error is: hashing, doc creation, 409
+        return callback(err);
 
       new LoginsUsers(this.db, this.authdb).createToken(userId, (err, token) => {
         if (err)
-          return callback(err); // TODO: account created, but failed to login
-                                // should be distinct from failed to create account.
+          return callback(err);
 
         callback(null, {
           id: userId,

@@ -2,6 +2,7 @@
 
 const BaseAction = require('./BaseAction');
 const {AliasAlreadyExistsError} = require('../errors');
+const Db = require('../db/db');
 
 class CreateAliasDocument extends BaseAction {
   constructor (db, userId, alias) {
@@ -35,6 +36,9 @@ class CreateAliasDocument extends BaseAction {
     };
 
     this.db.save(docId, docBody, (err, response) => {
+      if (err instanceof Db.RevisionMismatchError)
+        return callback(new AliasAlreadyExistsError(this.alias.type, this.alias.value));
+
       if (err)
         return callback(err);
 

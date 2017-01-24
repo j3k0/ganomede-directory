@@ -19,8 +19,6 @@ const normalizeAliases = (aliases) => {
 };
 
 class Profile {
-  // TODO
-  // Probably not need hash here…
   constructor (dbDoc) {
     this.id = dbDoc.id;
     this.aliases = normalizeAliases(dbDoc.aliases);

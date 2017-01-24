@@ -115,9 +115,7 @@ class Db {
   }
 
   // Updated existing document as per docBody (must have _id, _rev).
-
-  // TODO
-  // replaceing missing doc?..
+  // callback(err, couchReply) // reply is {ok, id, rev}
   replace (docBody, callback) {
     const hasIdRev = docBody.hasOwnProperty('_id') && docBody.hasOwnProperty('_rev');
     if (!hasIdRev)
