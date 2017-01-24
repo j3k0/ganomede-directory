@@ -28,9 +28,21 @@ const parseLogLevel = (envValue) => {
   return bunyan[level];
 };
 
+const parseApiSecret = () => {
+  const valid = process.env.hasOwnProperty('API_SECRET')
+    && (typeof process.env.API_SECRET === 'string')
+    && (process.env.API_SECRET.length > 0);
+
+  if (!valid)
+    throw new Error('API_SECRET must be non-empty string');
+
+  return process.env.API_SECRET;
+};
+
 module.exports = {
   name: pkg.name,
   logLevel: parseLogLevel(process.env.BUNYAN_LEVEL),
+  secret: parseApiSecret(),
 
   http: {
     host: process.env.HOST || '0.0.0.0',

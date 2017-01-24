@@ -7,12 +7,6 @@ const LoginsUsers = require('./users/LoginsUsers');
 const CreatesUsers = require('./users/CreatesUsers');
 const ChangesPasswords = require('./users/ChangesPasswords');
 
-// TODO
-// Implement api secret stuff:
-//   - when replying with profile
-//   - when creating/editing users
-//   - faking authdb stuff
-
 const nonemptyString = str => (typeof str === 'string') && (str.length > 0);
 const validateUserId = nonemptyString;
 const validatePassword = pwd => nonemptyString(pwd) && (pwd.length >= 8);
@@ -24,6 +18,12 @@ const validateAliases = aliases => Array.isArray(aliases) && aliases.every(valid
 const badUserId = next => sendHttpError(next, new restify.BadRequestError('Invalid User ID'));
 const badPassword = next => sendHttpError(next, new restify.BadRequestError('Password must be at least 8 characters long'));
 const badAliases = next => sendHttpError(next, new restify.BadRequestError('Some of the aliases are invalid'));
+
+const requireSecret = (req, res, next) => {
+  return req.ganomede.secretMatches
+    ? next()
+    : sendHttpError(next, new restify.NotAuthorizedError());
+};
 
 module.exports = ({db, authdb, prefix, server}) => {
   const findsProfiles = new FindsProfiles(db, authdb);
@@ -96,7 +96,7 @@ module.exports = ({db, authdb, prefix, server}) => {
   const lookupWithUserId = (req, res, next) => {
     const {userId} = req.params;
     return userId
-      ? findsProfiles.byUserId(userId, sendProfileBack(false, res, next))
+      ? findsProfiles.byUserId(userId, sendProfileBack(req.ganomede.secretMatches, res, next))
       : sendHttpError(next, new restify.BadRequestError());
   };
 
@@ -110,7 +110,7 @@ module.exports = ({db, authdb, prefix, server}) => {
   const lookupWithAlias = (req, res, next) => {
     const {type, value} = req.params;
     return (type && value)
-      ? findsProfiles.byAlias(type, value, sendProfileBack(false, res, next))
+      ? findsProfiles.byAlias(type, value, sendProfileBack(req.ganomede.secretMatches, res, next))
       : sendHttpError(next, new restify.BadRequestError());
   };
 
@@ -128,8 +128,8 @@ module.exports = ({db, authdb, prefix, server}) => {
   };
 
   // Validate secret here.
-  server.post(`${prefix}/users`, createUser);
-  server.post(`${prefix}/users/id/:userId`, editUser);
+  server.post(`${prefix}/users`, requireSecret, createUser);
+  server.post(`${prefix}/users/id/:userId`, requireSecret, editUser);
 
   server.get(`${prefix}/users/id/:userId`, lookupWithUserId);
   server.get(`${prefix}/users/auth/:token`, lookupWithToken);
