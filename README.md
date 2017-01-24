@@ -122,33 +122,6 @@ When:
 }
 ```
 
-## Retrieve all users [GET]
-
-### get parameters
-
- * `api_secret`: should be equal to env variable `API_SECRET`
- * `limit`: max number of users to retrieve
- * `offset`: offset used for pagination
-
-### response [200] OK
-
-```json
-{
-    "id": "hrry23",
-    "aliases": [
-        [1481436006, "email", "harry123@email.com"],
-        [1481436006, "name", "HariCo"],
-        [1481471231, "name", "Harry"],
-        [1481512304, "facebook", "12012484843"]
-    ],
-    "hash": "long-crypto-level-string-encoding-the-password"
-}
-```
-
- * For password hashing:
-    * https://github.com/florianheinemann/password-hash-and-salt
-
-
 Users indexed by id [/directory/v1/users/id/:id]
 ------------------------------------------------
 
