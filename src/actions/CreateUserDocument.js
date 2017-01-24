@@ -2,13 +2,30 @@
 
 const async = require('async');
 const LoginsUsers = require('../users/LoginsUsers');
+const {UserAlreadyExistsError} = require('../errors');
+const BaseAction = require('./BaseAction');
 
-class CreateUserDocument {
+class CreateUserDocument extends BaseAction {
   constructor (db, userId, password) {
+    super();
     this.db = db;
     this.userId = userId;
     this.password = password;
     this.result = null; // Couch reply to document craetion (ok, id, rev).
+  }
+
+  check (callback) {
+    const docId = `id:${this.userId}`;
+
+    this.db.exists(docId, (err, exists) => {
+      if (err)
+        return callback(err);
+
+      if (exists)
+        return callback(new UserAlreadyExistsError(this.userId));
+
+      callback(null);
+    });
   }
 
   execute (callback) {

@@ -20,7 +20,20 @@ class ActionsExecutor {
     );
   }
 
-  run (callback) {
+  // Runs in parallel, so be careful.
+  //
+  // TODO
+  // probably worth accumulating all the errors,
+  // instead of returning first one (sounds a bit "race condition"-y).
+  runChecks (callback) {
+    async.each(
+      this.actions,
+      (action, cb) => action.check(cb),
+      callback
+    );
+  }
+
+  runExecutes (callback) {
     const rollbackQueue = [];
 
     async.eachSeries(
@@ -40,6 +53,13 @@ class ActionsExecutor {
           : callback(null);
       }
     );
+  }
+
+  run (callback) {
+    async.series([
+      (cb) => this.runChecks(cb),
+      (cb) => this.runExecutes(cb)
+    ], callback);
   }
 }
 

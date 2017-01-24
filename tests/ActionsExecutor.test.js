@@ -1,11 +1,13 @@
 'use strict';
 
+const BaseAction = require('../src/actions/BaseAction');
 const ActionsExecutor = require('../src/ActionsExecutor');
 
 describe('ActionsExecutor', () => {
   describe('#run()', () => {
-    class TestAction {
+    class TestAction extends BaseAction {
       constructor (resultsRef, num) {
+        super();
         this.resultsRef = resultsRef;
         this.num = num;
       }
@@ -21,7 +23,7 @@ describe('ActionsExecutor', () => {
       }
     }
 
-    class FailingAction {
+    class FailingAction extends BaseAction {
       execute (callback) {
         setImmediate(callback, new Error('FailingAction'));
       }
@@ -53,6 +55,51 @@ describe('ActionsExecutor', () => {
       executor.run((err) => {
         expect(err).to.be.an('error');
         expect(results).to.eql([]);
+        done();
+      });
+    });
+
+    it('Runs all `check()`s before `execute()`ing any actions', (done) => {
+      const checks = [];
+      const executes = [];
+
+      class CheckableAction extends BaseAction {
+        check (cb) {
+          checks.push(Date.now());
+          setTimeout(cb, 5, null);
+        }
+
+        execute (cb) {
+          executes.push(Date.now());
+          setTimeout(cb, 5, null);
+        }
+      }
+
+      const executor = new ActionsExecutor([
+        new CheckableAction(),
+        new CheckableAction()
+      ]);
+
+      executor.run((err) => {
+        expect(err).to.be.null;
+        expect(checks).to.have.length(2);
+        expect(checks[checks.length - 1]).not.to.be.above(executes[0]);
+        done();
+      });
+    });
+
+    it('Does not run any `execute()`s if check fails', (done) => {
+      class FailingCheckAction extends BaseAction {
+        check (cb) {
+          setImmediate(cb, new Error('FailingCheckAction'));
+        }
+
+        execute () { throw new Error('Never should get here'); }
+      }
+
+      new ActionsExecutor([new FailingCheckAction()]).run(err => {
+        expect(err).to.be.an('error');
+        expect(err.message).to.equal('FailingCheckAction');
         done();
       });
     });

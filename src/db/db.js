@@ -33,6 +33,19 @@ class Db {
     this.db = nano(url).use(name);
   }
 
+  // callback(err, Boolean)
+  exists (docId, callback) {
+    this.db.head(docId, (err, _, headers) => {
+      if (DocumentNotFoundError.matches(err))
+        return callback(null, false);
+
+      if (err)
+        return callback(err);
+
+      callback(null, true);
+    });
+  }
+
   // Get doc by its id. Special errors:
   //  - DocumentNotFoundError when doc is missing.
   //
@@ -111,13 +124,13 @@ class Db {
       return setImmediate(callback, new Error('Missing `_id` and/or `_rev` fields; use save() for new documents.'));
 
     async.waterfall([
-      (cb) => this.db.head(docBody._id, (err, _, headers) => {
-        if (DocumentNotFoundError.matches(err))
-          return cb(new DocumentNotFoundError(docBody._id));
+      (cb) => this.exists(docBody._id, (err, exists) => {
+        if (err)
+          return cb(err);
 
-        return err
-          ? cb(err)
-          : cb(null);
+        return exists
+          ? cb(null)
+          : cb(new DocumentNotFoundError(docBody._id));
       }),
 
       (cb) => this.db.insert(docBody, cb)

@@ -1,5 +1,6 @@
 'use strict';
 
+const {AliasAlreadyExistsError} = require('../../src/errors');
 const CreateAliasDocument = require('../../src/actions/CreateAliasDocument');
 
 describe('CreateAliasDocument', () => {
@@ -46,6 +47,36 @@ describe('CreateAliasDocument', () => {
     action.rollback((err) => {
       expect(err).to.be.null;
       done();
+    });
+  });
+
+  describe('#check()', () => {
+    const db = td.object(['exists']);
+    const action = new CreateAliasDocument(db, 'jdoe', {
+      type: 'email',
+      value: 'jdoe@example.com',
+      date: new Date(),
+      public: true
+    });
+
+    it('succeeds if document is not in database', (done) => {
+      td.when(db.exists('alias:email:jdoe@example.com', td.callback))
+        .thenCallback(null, false);
+
+      action.check((err) => {
+        expect(err).to.be.null;
+        done();
+      });
+    });
+
+    it('fails if document is in database', (done) => {
+      td.when(db.exists('alias:email:jdoe@example.com', td.callback))
+        .thenCallback(null, true);
+
+      action.check((err) => {
+        expect(err).to.be.instanceof(AliasAlreadyExistsError);
+        done();
+      });
     });
   });
 });

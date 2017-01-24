@@ -169,4 +169,22 @@ describe.skip('Db', () => {
       });
     });
   });
+
+  describe('#exists()', () => {
+    it('true for existing docs', (done) => {
+      db.exists('_design/users', (err, exists) => {
+        expect(err).to.be.null;
+        expect(exists).to.be.true;
+        done();
+      });
+    });
+
+    it('false for missing docs', (done) => {
+      db.exists(MISSING_DOC_ID, (err, exists) => {
+        expect(err).to.be.null;
+        expect(exists).to.be.false;
+        done();
+      });
+    });
+  });
 });

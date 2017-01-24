@@ -21,6 +21,20 @@ class BaseError extends Error {
   }
 }
 
+class UserAlreadyExistsError extends BaseError {
+  constructor (userId) {
+    super('User already exists %j', {userId});
+  }
+}
+
+class AliasAlreadyExistsError extends BaseError {
+  constructor (type, value) {
+    super('Alias already exists %j', {type, value});
+  }
+}
+
 module.exports = {
-  BaseError
+  BaseError,
+  UserAlreadyExistsError,
+  AliasAlreadyExistsError
 };

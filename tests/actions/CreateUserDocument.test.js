@@ -1,5 +1,7 @@
 'use strict';
 
+const {UserAlreadyExistsError} = require('../../src/errors');
+
 describe('CreateUserDocument', () => {
   let LoginsUsers;
   let CreateUserDocument;
@@ -47,6 +49,32 @@ describe('CreateUserDocument', () => {
 
     action.rollback((err) => {
       expect(err).to.be.null;
+      done();
+    });
+  });
+
+  it('#check() succeeds if document is not in database', (done) => {
+    const db = td.object(['exists']);
+    const action = new CreateUserDocument(db, 'jdoe', 'pwd');
+
+    td.when(db.exists('id:jdoe', td.callback))
+      .thenCallback(null, false);
+
+    action.check((err) => {
+      expect(err).to.be.null;
+      done();
+    });
+  });
+
+  it('#check() fails if document is in database', (done) => {
+    const db = td.object(['exists']);
+    const action = new CreateUserDocument(db, 'jdoe', 'pwd');
+
+    td.when(db.exists('id:jdoe', td.callback))
+      .thenCallback(null, true);
+
+    action.check((err) => {
+      expect(err).to.be.instanceof(UserAlreadyExistsError);
       done();
     });
   });
