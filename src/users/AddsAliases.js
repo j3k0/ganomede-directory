@@ -9,8 +9,15 @@ class AddsAliases {
   }
 
   add (userId, aliases, callback) {
+    const now = new Date();
+
     return new ActionsExecutor([
-      ...aliases.map(alias => new CreateAliasDocument(this.db, userId, alias))
+      ...aliases.map(alias => new CreateAliasDocument(this.db, userId, {
+        type: alias.type,
+        value: alias.value,
+        date: now,
+        public: alias.public === true
+      }))
     ]).run(callback);
   }
 }

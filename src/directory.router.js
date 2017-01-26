@@ -59,7 +59,7 @@ module.exports = ({db, authdb, prefix, server}) => {
     changesPasswords.change(userId, newPassword, (err) => {
       return err
         ? sendHttpError(next, err)
-        : res.status(200).end();
+        : res.send(200, '');
     });
   };
 
@@ -70,7 +70,7 @@ module.exports = ({db, authdb, prefix, server}) => {
     addsAliases.add(userId, aliases, (err) => {
       return err
         ? sendHttpError(next, err)
-        : res.status(200).end();
+        : res.send(200, '');
     });
   };
 

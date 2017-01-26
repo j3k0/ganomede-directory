@@ -72,7 +72,7 @@ const sendHttpError = (next, err) => {
     // (not worth logging all of stuff like BadRequest(invalid body))
     // Convert to interal error otherwise, maybe?
     default:
-      logger.log(err);
+      logger.error(err);
       return next(err);
   }
 };
