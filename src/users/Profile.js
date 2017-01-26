@@ -26,7 +26,7 @@ class Profile {
 
   _toApiObject (includePrivateData) {
     return {
-      user_id: this.id,
+      id: this.id,
       aliases: this.aliases.reduce((self, alias) => {
         if (includePrivateData || alias.public)
           self[alias.type] = alias.value;

@@ -232,7 +232,7 @@ There cannot be more than 1 match (aliases are contrained to be globally unique)
 
 ```json
 {
-    "user_id": "hrry23",
+    "id": "hrry23",
     "aliases": {
         "name": "Harry"
     }

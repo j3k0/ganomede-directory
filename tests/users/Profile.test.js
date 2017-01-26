@@ -48,7 +48,7 @@ describe('Profile', () => {
 
   it('#public() returns public aliases', () => {
     expect(profile.public()).to.eql({
-      user_id: 'alice',
+      id: 'alice',
       aliases: {
         name: 'Alice In Wonderland'
       }
@@ -57,7 +57,7 @@ describe('Profile', () => {
 
   it('#private() returns all aliases', () => {
     expect(profile.private()).to.eql({
-      user_id: 'alice',
+      id: 'alice',
       aliases: {
         name: 'Alice In Wonderland',
         email: 'alice@rewrite.com'
