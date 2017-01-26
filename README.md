@@ -117,8 +117,7 @@ When:
 
 ```json
 {
-    "id": "hrry23",
-    "token": "an-authentication-token"
+    "id": "hrry23"
 }
 ```
 

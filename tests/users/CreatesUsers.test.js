@@ -2,12 +2,10 @@
 
 describe('CreatesUsers', () => {
   let CreatesUsers;
-  let LoginsUsers;
   let ActionsExecutor;
 
   beforeEach(() => {
     ActionsExecutor = td.replace('../../src/ActionsExecutor');
-    LoginsUsers = td.replace('../../src/users/LoginsUsers');
     CreatesUsers = require('../../src/users/CreatesUsers');
   });
 
@@ -27,13 +25,9 @@ describe('CreatesUsers', () => {
     td.when(ActionsExecutor.run(td.callback))
       .thenCallback(null);
 
-    td.when(LoginsUsers.createToken('jdoe', td.callback))
-      .thenCallback(null, 'auth-token');
-
-    new CreatesUsers().create(userId, password, aliases, (err, {id, token} = {}) => {
+    new CreatesUsers().create(userId, password, aliases, (err, response) => {
       expect(err).to.be.null;
-      expect(id).to.equal('jdoe');
-      expect(token).to.equal('auth-token');
+      expect(response).to.eql({id: 'jdoe'});
       done();
     });
   });

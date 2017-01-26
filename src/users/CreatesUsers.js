@@ -1,6 +1,5 @@
 'use strict';
 
-const LoginsUsers = require('./LoginsUsers');
 const actions = require('../actions');
 const ActionsExecutor = require('../ActionsExecutor');
 
@@ -24,18 +23,9 @@ class CreatesUsers {
     ];
 
     new ActionsExecutor(steps).run((err) => {
-      if (err)
-        return callback(err);
-
-      new LoginsUsers(this.db, this.authdb).createToken(userId, (err, token) => {
-        if (err)
-          return callback(err);
-
-        callback(null, {
-          id: userId,
-          token
-        });
-      });
+      return err
+        ? callback(err)
+        : callback(null, {id: userId})
     });
   }
 }
