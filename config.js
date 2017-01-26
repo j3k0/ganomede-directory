@@ -59,6 +59,11 @@ module.exports = {
       return `http://${host}:${port}/`;
     }()),
     name: process.env.COUCH_NAME || 'ganomede_directory_test'
+  },
+
+  authdb: {
+    host: process.env.REDIS_AUTH_PORT_6379_TCP_ADDR || 'localhost',
+    port: parseInt(process.env.REDIS_AUTH_PORT_6379_TCP_PORT, 10) || 6379
   }
 };
 

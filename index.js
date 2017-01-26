@@ -5,10 +5,9 @@ const cluster = require('cluster');
 const restify = require('restify');
 const curtain = require('curtain-down');
 const config = require('./config');
-const about = require('./src/about.router');
-const ping = require('./src/ping.router');
 const createServer = require('./src/server');
 const logger = require('./src/logger');
+const main = require('./src/main');
 
 const master = () => {
   let running = true;
@@ -51,13 +50,7 @@ const child = () => {
     ], () => cluster.worker.disconnect());
   });
 
-  about(config.http.prefix, server);
-  ping(config.http.prefix, server);
-
-  server.listen(config.http.port, config.http.host, () => {
-    const {port, family, address} = server.address();
-    logger.info('ready at %s:%d (%s)', address, port, family);
-  });
+  main(server);
 
   // Handle uncaughtException, kill the worker.
   server.on('uncaughtException', (req, res, route, err) => {
