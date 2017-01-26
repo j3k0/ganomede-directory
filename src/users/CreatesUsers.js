@@ -25,7 +25,7 @@ class CreatesUsers {
     new ActionsExecutor(steps).run((err) => {
       return err
         ? callback(err)
-        : callback(null, {id: userId})
+        : callback(null, {id: userId});
     });
   }
 }

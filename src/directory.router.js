@@ -6,6 +6,7 @@ const FindsProfiles = require('./users/FindsProfiles');
 const LoginsUsers = require('./users/LoginsUsers');
 const CreatesUsers = require('./users/CreatesUsers');
 const ChangesPasswords = require('./users/ChangesPasswords');
+const AddsAliases = require('./users/AddsAliases');
 
 const nonemptyString = str => (typeof str === 'string') && (str.length > 0);
 const validateUserId = nonemptyString;
@@ -30,6 +31,7 @@ module.exports = ({db, authdb, prefix, server}) => {
   const loginsUsers = new LoginsUsers(db, authdb);
   const createsUsers = new CreatesUsers(db, authdb);
   const changesPasswords = new ChangesPasswords(db);
+  const addsAliases = new AddsAliases(db);
 
   const createUser = (req, res, next) => {
     const {id, password, aliases} = req.body;
@@ -65,9 +67,11 @@ module.exports = ({db, authdb, prefix, server}) => {
     if (!validateAliases(aliases))
       return badAliases(next);
 
-    // TODO
-    // implement this
-    next(new restify.NotImplementedError());
+    addsAliases.add(userId, aliases, (err) => {
+      return err
+        ? sendHttpError(next, err)
+        : res.status(200).end();
+    });
   };
 
   const editUser = (req, res, next) => {
