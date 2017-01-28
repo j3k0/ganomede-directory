@@ -3,8 +3,8 @@
 const nano = require('nano');
 const async = require('async');
 const {expect} = require('chai');
-const config = require('../config');
-const Db = require('../src/db/db');
+const config = require('../../config');
+const Db = require('../../src/db/db');
 
 // For nano API investigation
 
