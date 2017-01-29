@@ -20,6 +20,8 @@ Configuration
 
  * `COUCH_NAME` — name of couch database, defaults to `'ganomede_directory_test'`;
  * `COUCH_DESIGN` — name of couch db design to use (source only needs 1 design atm, but in case multiple are needed, we'll need to rethink this);
+ * `COUCH_SYNC` — sync design document, trigger view recalculation and exit:
+   - on process start, we check that design document in database matches the one source code expects. In case this isn't true, app fails to start. To fix the situation, set this env var to any value, start process as usual, wait for it to exit cleanly and restart with this env var unset.
  * `COUCH_DIRECTORY_PORT_5984_TCP_ADDR` - IP of the directory couchdb, defaults to `'localhost'`;
  * `COUCH_DIRECTORY_PORT_5984_TCP_PORT` - Port of the directory couchdb, defaults to `5984`;
  * `REDIS_AUTH_PORT_6379_TCP_ADDR` - IP of the AuthDB redis

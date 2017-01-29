@@ -59,7 +59,8 @@ module.exports = {
       return `http://${host}:${port}/`;
     }()),
     name: process.env.COUCH_NAME || 'ganomede_directory_test',
-    designName: process.env.COUCH_VIEW || 'directory'
+    designName: process.env.COUCH_VIEW || 'directory',
+    syncDesignAndExit: process.env.hasOwnProperty('COUCH_SYNC')
   },
 
   authdb: {
