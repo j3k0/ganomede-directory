@@ -58,7 +58,8 @@ module.exports = {
       const port = parseInt(process.env.COUCH_DIRECTORY_PORT_5984_TCP_PORT, 10) || 5984;
       return `http://${host}:${port}/`;
     }()),
-    name: process.env.COUCH_NAME || 'ganomede_directory_test'
+    name: process.env.COUCH_NAME || 'ganomede_directory_test',
+    designName: process.env.COUCH_VIEW || 'directory'
   },
 
   authdb: {

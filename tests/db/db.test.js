@@ -14,12 +14,8 @@ const Db = require('../../src/db/db');
 // for couch reset/populate. Do it later.
 
 describe.skip('Db', () => {
-  const db = new Db({
-    url: config.couch.url,
-    name: 'contrasstest'
-  });
-
-  const couch = nano(config.couch.url).use('contrasstest');
+  const db = new Db(config.couch);
+  const couch = nano(config.couch.url).use(config.couch.name);
 
   const MISSING_DOC_ID = 'i-am-not-in-database-missing';
   const TEST_DOC_ID = 'delete-me';
@@ -160,7 +156,7 @@ describe.skip('Db', () => {
     });
   });
 
-  describe.skip('#list()', () => {
+  describe('#list()', () => {
     it('lists view with listFunc', (done) => {
       db.list('rawProfiles', 'profiles', {key: 'alice'}, (err, body) => {
         expect(err).to.be.null;
@@ -172,7 +168,7 @@ describe.skip('Db', () => {
 
   describe('#exists()', () => {
     it('true for existing docs', (done) => {
-      db.exists('_design/users', (err, exists) => {
+      db.exists('_design/directory', (err, exists) => {
         expect(err).to.be.null;
         expect(exists).to.be.true;
         done();

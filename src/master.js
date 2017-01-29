@@ -40,7 +40,7 @@ const work = () => {
 
 const initDb = (callback) => {
   const sync = process.argv.includes('--sync-db');
-  const designs = [new Design(path.resolve(__dirname, 'db/users.design.js'))];
+  const designs = [new Design(config.couch.designName, path.resolve(__dirname, 'db/users.design.js'))];
   const initalizer = new DbInitializer(config.couch, designs, {sync});
   initalizer.init(callback);
 };

@@ -60,11 +60,8 @@ const config = require('../../config');
 // });
 
 describe.skip('DbInitializer', () => {
-  const design = new Design(path.resolve(__dirname, '../../src/db/users.design.js'));
-  const initializer = new DbInitializer({
-    url: config.couch.url,
-    name: 'blah'
-  }, [design], {sync: true});
+  const design = new Design(config.couch.designName, path.resolve(__dirname, '../../src/db/users.design.js'));
+  const initializer = new DbInitializer(config.couch, [design], {sync: true});
 
   it('thingy', (done) => {
     initializer.init((err) => {

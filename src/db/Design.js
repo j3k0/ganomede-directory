@@ -1,11 +1,10 @@
 'use strict';
 
 const fs = require('fs');
-const path = require('path');
 
 class Design {
-  constructor (filepath) {
-    this.name = path.basename(filepath).slice(0, -'.design.js'.length);
+  constructor (name, filepath) {
+    this.name = name;
     this.source = fs.readFileSync(filepath, 'utf8');
     this.exports = require(filepath);
   }

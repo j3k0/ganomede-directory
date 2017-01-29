@@ -29,8 +29,9 @@ class RevisionMismatchError extends BaseError {
 
 class Db {
   // new DB(config.couch)
-  constructor ({url, name}) {
+  constructor ({url, name, designName}) {
     this.db = nano(url).use(name);
+    this.designName = designName;
   }
 
   // callback(err, Boolean)
@@ -149,7 +150,7 @@ class Db {
   // TODO
   // awkward, probably redo this.
   list (viewname, listname, qs, callback) {
-    this.db.viewWithList('users', viewname, listname, qs, (err, body, headers) => {
+    this.db.viewWithList(this.designName, viewname, listname, qs, (err, body, headers) => {
       return err
         ? callback(err)
         : callback(null, body);
