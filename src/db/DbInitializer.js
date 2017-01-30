@@ -2,12 +2,13 @@
 
 const nano = require('nano');
 const async = require('async');
+const lodash = require('lodash');
 const Db = require('./db');
 const {BaseError} = require('../errors');
 
 class OutOfSyncError extends BaseError {
   constructor ({databaseExists, designs}) {
-    const designsStatus = Object.entries(designs).map(([name, status]) => {
+    const designsStatus = lodash.entries(designs).map(([name, status]) => {
       return `  - _design/${name}: ${(status === null) ? 'ok' : 'missing/changed'}`;
     }).join('\n');
 
@@ -103,7 +104,7 @@ class DbInitializer {
       },
 
       (cb) => {
-        const missing = Object.values(designs).filter(d => d);
+        const missing = lodash.values(designs).filter(d => d);
         this.insertDesigns(missing, cb);
       }
     ], callback);
@@ -116,7 +117,7 @@ class DbInitializer {
         return callback(err);
 
       const same = checkResult.databaseExists
-        && Object.values(checkResult.designs).every(d => d === null);
+        && lodash.values(checkResult.designs).every(d => d === null);
 
       // Nothing to do, everything is up to date.
       if (same)
