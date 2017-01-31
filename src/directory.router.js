@@ -82,14 +82,18 @@ module.exports = ({db, authdb, prefix, server}) => {
       return badUserId(next);
 
     if (req.body) {
-      if (req.body.hasOwnProperty('password'))
+      const hasPassword = req.body.hasOwnProperty('password');
+      const hasAliases = req.body.hasOwnProperty('aliases');
+      const hasSingleMethod = !(hasPassword && hasAliases); // no bool xor in js, huh…
+
+      if (hasSingleMethod && hasPassword)
         return changePassword(userId, req.body.password, res, next);
 
-      if (req.body.hasOwnProperty('aliases'))
+      if (hasSingleMethod && hasAliases)
         return addAliases(userId, req.body.aliases, res, next);
     }
 
-    sendHttpError(next, new RequestValidationError('BadEditMethod', 'Not sure what to do, please include new password or aliases to add'));
+    sendHttpError(next, new RequestValidationError('BadEditMethod', 'Not sure what to do, please include either new password, or aliases to add'));
   };
 
   const sendProfileBack = (includePrivateDate, res, next) => (err, profile) => {
