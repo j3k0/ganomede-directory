@@ -81,11 +81,42 @@ class InvalidCredentialsError extends BaseError {
   }
 }
 
+// This is for validation errors (like missing `body` or certain parts of it),
+// same as base error except it allows to specify custom restCode
+// via changing instance's .name (see BaseError#toRestError()).
+//
+// Use like this:
+//
+//   if (!req.body.userId) {
+//     const err = new RequestValidationError('BadUserId', 'Invalid or missing User ID');
+//     return sendHttpError(next, err);
+//   }
+//
+//   // will result in http 404 with json body:
+//   // { "code": "BadUserId",
+//   //   "message": "Invalid or missing User ID" }
+class RequestValidationError extends BaseError {
+  constructor (name, ...messageArgs) {
+    super(...messageArgs);
+    this.name = name;
+  }
+
+  get statusCode () {
+    return 400;
+  }
+}
+
 // Kept forgetting `next` part, so let's change this to (next, err).
 const sendHttpError = (next, err) => {
   if (err instanceof BaseError)
     return next(err.toRestError());
 
+  // TODO
+  // This is probably not needed, since we are expecting
+  // either `BaseError` (and descendants instances) here,
+  // or "core" errors like `socket hang up`.
+  // (It is probably best to wrap everything else that is of "restify"-y nature
+  // into one of `BaseError`-based classes (or even create new one)
   if (err instanceof restify.HttpError)
     return next(err);
 
@@ -100,5 +131,6 @@ module.exports = {
   UserNotFoundError,
   InvalidAuthTokenError,
   InvalidCredentialsError,
+  RequestValidationError,
   sendHttpError
 };
