@@ -21,11 +21,23 @@ class BaseError extends Error {
 
     Error.captureStackTrace(this, this.constructor);
   }
+
+  toRestError () {
+    return new restify.RestError({
+      restCode: this.name,
+      statusCode: this.statusCode,
+      message: this.message
+    });
+  }
 }
 
 class UserAlreadyExistsError extends BaseError {
   constructor (userId) {
     super('User already exists %j', {userId});
+  }
+
+  get statusCode () {
+    return 409;
   }
 }
 
@@ -33,11 +45,19 @@ class AliasAlreadyExistsError extends BaseError {
   constructor (type, value) {
     super('Alias already exists %j', {type, value});
   }
+
+  get statusCode () {
+    return 409;
+  }
 }
 
 class UserNotFoundError extends BaseError {
   constructor (userId) {
     super('User not found %j', {userId});
+  }
+
+  get statusCode () {
+    return 404;
   }
 }
 
@@ -45,36 +65,32 @@ class InvalidAuthTokenError extends BaseError {
   constructor () {
     super('Invalid auth token');
   }
+
+  get statusCode () {
+    return 401;
+  }
 }
 
 class InvalidCredentialsError extends BaseError {
   constructor () {
     super('Invalid credentials');
   }
+
+  get statusCode () {
+    return 401;
+  }
 }
 
 // Kept forgetting `next` part, so let's change this to (next, err).
 const sendHttpError = (next, err) => {
-  switch (err.constructor) {
-    case AliasAlreadyExistsError:
-    case UserAlreadyExistsError:
-      return next(new restify.ConflictError(err.message));
+  if (err instanceof BaseError)
+    return next(err.toRestError());
 
-    case UserNotFoundError:
-      return next(new restify.NotFoundError(err.message));
+  if (err instanceof restify.HttpError)
+    return next(err);
 
-    case InvalidCredentialsError:
-    case InvalidAuthTokenError:
-      return next(new restify.ForbiddenError(err.message));
-
-    // TODO
-    // check instanceof restify.HttpError
-    // (not worth logging all of stuff like BadRequest(invalid body))
-    // Convert to interal error otherwise, maybe?
-    default:
-      logger.error(err);
-      return next(err);
-  }
+  logger.error(err);
+  next(err);
 };
 
 module.exports = {
