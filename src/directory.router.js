@@ -43,7 +43,7 @@ module.exports = ({db, authdb, prefix, server}) => {
       return badPassword(next);
 
     if (!validateAliases(aliases))
-      return badAliases(aliases);
+      return badAliases(next);
 
     createsUsers.create(id, password, aliases, (err, json) => {
       return err
