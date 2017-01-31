@@ -23,6 +23,12 @@ class BaseError extends Error {
   }
 
   toRestError () {
+    if (!this.statusCode)
+      throw new Error(`Please define "statusCode" prop for ${this.constructor.name}`);
+
+    // TODO
+    // Stack is useless. Probably do `result.stack = this.stack`.
+
     return new restify.RestError({
       restCode: this.name,
       statusCode: this.statusCode,
@@ -34,50 +40,35 @@ class BaseError extends Error {
 class UserAlreadyExistsError extends BaseError {
   constructor (userId) {
     super('User already exists %j', {userId});
-  }
-
-  get statusCode () {
-    return 409;
+    this.statusCode = 409;
   }
 }
 
 class AliasAlreadyExistsError extends BaseError {
   constructor (type, value) {
     super('Alias already exists %j', {type, value});
-  }
-
-  get statusCode () {
-    return 409;
+    this.statusCode = 409;
   }
 }
 
 class UserNotFoundError extends BaseError {
   constructor (userId) {
     super('User not found %j', {userId});
-  }
-
-  get statusCode () {
-    return 404;
+    this.statusCode = 404;
   }
 }
 
 class InvalidAuthTokenError extends BaseError {
   constructor () {
     super('Invalid auth token');
-  }
-
-  get statusCode () {
-    return 401;
+    this.statusCode = 401;
   }
 }
 
 class InvalidCredentialsError extends BaseError {
   constructor () {
     super('Invalid credentials');
-  }
-
-  get statusCode () {
-    return 401;
+    this.statusCode = 401;
   }
 }
 
@@ -99,10 +90,7 @@ class RequestValidationError extends BaseError {
   constructor (name, ...messageArgs) {
     super(...messageArgs);
     this.name = name;
-  }
-
-  get statusCode () {
-    return 400;
+    this.statusCode = 400;
   }
 }
 
