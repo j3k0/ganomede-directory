@@ -106,15 +106,16 @@ List of all users [/directory/v1/users]
 
 When:
 
- * password isn't safe enough:
-   * too short: less than 8 characters
+ * `BadUserId` missing or anything other than non-empty string;
+ * `BadPassword` password is missing or too short (less than 8 characters);
+ * `BadAliases` invalid aliases format (`type` and `email` are not non-empty strings, `public` present but not boolean).
 
 ### response [409] Conflict
 
 When:
 
- * user id is already taken
- * one of the provided aliases is not available
+ * `UserAlreadyExistsError` user id is already taken
+ * `AliasAlreadyExistsError` one of the provided aliases is not available
 
 ### response [200] OK
 
@@ -144,6 +145,15 @@ There cannot be more than 1 match (because user ids are globally unique).
 }
 ```
 
+### response [400] Bad Request
+
+  * `BadUserId` missing or anything other than non-empty string;
+
+
+### response [404] Not Found
+
+  * `UserNotFoundError` no user with such id
+
 _note: this call only exposes public aliases_
 
 ## Edit a user [POST]
@@ -171,6 +181,27 @@ To change the password:
 }
 ```
 
+### Response [401] Not Authorized
+
+ * `NotAuthorized` Invalid / missing secret.
+
+### Response [400] Bad Request
+
+ * `BadUserId` missing or anything other than non-empty string;
+
+
+ * when chaning password:
+   * `BadPassword` password is missing or too short (less than 8 characters);
+
+ * when adding alias:
+  * `BadAliases` invalid aliases format (`type` and `email` are not non-empty strings, `public` present but not boolean).
+
+ * `BadEditMethod` missing `password` or `aliases`, or both are present at the same time.
+
+### Response [404] Not Found
+
+ * `UserNotFoundError` no user with such id
+
 User auth tokens [/directory/v1/users/auth]
 -------------------------------------------
 
@@ -196,7 +227,19 @@ Or, like some people call this, login.
 }
 ```
 
-### response [401] Unauthorized
+
+### Response [401] Not Authorized
+
+ * `InvalidCredentialsError` Invalid user id + password pair.
+
+### Response [404] Not Found
+
+ * `UserNotFoundError` no user with such id
+
+### Response [400] Bad Request
+
+ * `BadUserId` missing or anything other than non-empty string;
+ * `BadPassword` password is missing or too short (less than 8 characters);
 
 User indexed by auth token [/directory/v1/users/auth/:token]
 ------------------------------------------------------------
@@ -220,6 +263,19 @@ There cannot be more than 1 match (auth tokens are globally unique).
 }
 ```
 
+InvalidAuthTokenError
+### Response [401] Not Authorized
+
+ * `InvalidAuthTokenError` missing / invalid token
+
+### Response [404] Not Found
+
+ * `UserNotFoundError` token resolved to user id which was not found.
+
+### Response [400] Bad Request
+
+ * `BadUserId` missing or anything other than non-empty string;
+
 _note: this call exposes both public and private aliases_
 
 User indexed by alias [/directory/v1/users/alias/:type/:value]
@@ -241,5 +297,13 @@ There cannot be more than 1 match (aliases are contrained to be globally unique)
     }
 }
 ```
+
+### Response [404] Not Found
+
+ * `UserNotFoundError` alias resolved to user id which was not found.
+
+### Response [400] Bad Request
+
+ * `BadAlias` type or value, or both are something other than non-empty string;
 
 _note: this call exposes only public aliases_
