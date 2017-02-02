@@ -9,12 +9,16 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const glob = require('glob');
 const tagizer = require('ganomede-tagizer');
 
 const FB_APP_ID = process.env.APP_ID;
 
-const generatePassword = () => 'qwerty';
+// TODO:
+// That's a bit of placeholder, maybe we want something more memorable,
+// maybe we don't quite care, since user are expected to change it later.
+const generatePassword = () => crypto.randomBytes(10).toString('hex');
 
 class UserProfile {
   constructor ({username, email, givenName, middleName}) {
