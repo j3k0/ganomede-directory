@@ -1,0 +1,25 @@
+app:
+    build: .
+    command: node index.js | ./node_modules/.bin/bunyan -l 0
+    volumes:
+     - ./src:/home/app/code/src
+     - ./tests:/home/app/code/tests
+     - ./index.js:/home/app/code/index.js
+     - ./config.js:/home/app/code/config.js
+     - ./package.json:/home/app/code/package.json
+    ports:
+     - "8000:8000"
+    links:
+     - couch:couch_directory
+     - redisAuth:redis_auth
+    environment:
+     - "API_SECRET=1234"
+
+couch:
+    image: klaemo/couchdb:1.6.1
+
+redisAuth:
+    image: tutum/redis:latest
+    environment:
+     - "REDIS_PASS=**None**"
+

@@ -18,8 +18,12 @@ The microservice allows to manage users:
 Configuration
 -------------
 
- * `COUCH_DIRECTORY_PORT_5984_TCP_ADDR` - IP of the directory couchdb
- * `COUCH_DIRECTORY_PORT_5984_TCP_PORT` - Port of the directory couchdb
+ * `COUCH_NAME` — name of couch database, defaults to `'ganomede_directory_test'`;
+ * `COUCH_DESIGN` — name of couch db design to use (source only needs 1 design atm, but in case multiple are needed, we'll need to rethink this);
+ * `COUCH_SYNC` — sync design document, trigger view recalculation and exit:
+   - on process start, we check that design document in database matches the one source code expects. In case this isn't true, app fails to start. To fix the situation, set this env var to any value, start process as usual, wait for it to exit cleanly and restart with this env var unset.
+ * `COUCH_DIRECTORY_PORT_5984_TCP_ADDR` - IP of the directory couchdb, defaults to `'localhost'`;
+ * `COUCH_DIRECTORY_PORT_5984_TCP_PORT` - Port of the directory couchdb, defaults to `5984`;
  * `REDIS_AUTH_PORT_6379_TCP_ADDR` - IP of the AuthDB redis
  * `REDIS_AUTH_PORT_6379_TCP_PORT` - Port of the AuthDB redis
  * `API_SECRET` - Give access to private APIs
@@ -102,51 +106,24 @@ List of all users [/directory/v1/users]
 
 When:
 
- * password isn't safe enough:
-   * too short: less than 8 characters
+ * `BadUserId` missing or anything other than non-empty string;
+ * `BadPassword` password is missing or too short (less than 8 characters);
+ * `BadAliases` invalid aliases format (`type` and `email` are not non-empty strings, `public` present but not boolean).
 
 ### response [409] Conflict
 
 When:
 
- * user id is already taken
- * one of the provided aliases is not available
+ * `UserAlreadyExistsError` user id is already taken
+ * `AliasAlreadyExistsError` one of the provided aliases is not available
 
 ### response [200] OK
 
 ```json
 {
-    "id": "hrry23",
-    "token": "an-authentication-token"
+    "id": "hrry23"
 }
 ```
-
-## Retrieve all users [GET]
-
-### get parameters
-
- * `api_secret`: should be equal to env variable `API_SECRET`
- * `limit`: max number of users to retrieve
- * `offset`: offset used for pagination
-
-### response [200] OK
-
-```json
-{
-    "id": "hrry23",
-    "aliases": [
-        [1481436006, "email", "harry123@email.com"],
-        [1481436006, "name", "HariCo"],
-        [1481471231, "name", "Harry"],
-        [1481512304, "facebook", "12012484843"]
-    ],
-    "hash": "long-crypto-level-string-encoding-the-password"
-}
-```
-
- * For password hashing:
-    * https://github.com/florianheinemann/password-hash-and-salt
-
 
 Users indexed by id [/directory/v1/users/id/:id]
 ------------------------------------------------
@@ -167,6 +144,15 @@ There cannot be more than 1 match (because user ids are globally unique).
     }
 }
 ```
+
+### response [400] Bad Request
+
+  * `BadUserId` missing or anything other than non-empty string;
+
+
+### response [404] Not Found
+
+  * `UserNotFoundError` no user with such id
 
 _note: this call only exposes public aliases_
 
@@ -195,6 +181,27 @@ To change the password:
 }
 ```
 
+### Response [401] Not Authorized
+
+ * `NotAuthorized` Invalid / missing secret.
+
+### Response [400] Bad Request
+
+ * `BadUserId` missing or anything other than non-empty string;
+
+
+ * when chaning password:
+   * `BadPassword` password is missing or too short (less than 8 characters);
+
+ * when adding alias:
+  * `BadAliases` invalid aliases format (`type` and `email` are not non-empty strings, `public` present but not boolean).
+
+ * `BadEditMethod` missing `password` or `aliases`, or both are present at the same time.
+
+### Response [404] Not Found
+
+ * `UserNotFoundError` no user with such id
+
 User auth tokens [/directory/v1/users/auth]
 -------------------------------------------
 
@@ -220,7 +227,19 @@ Or, like some people call this, login.
 }
 ```
 
-### response [401] Unauthorized
+
+### Response [401] Not Authorized
+
+ * `InvalidCredentialsError` Invalid user id + password pair.
+
+### Response [404] Not Found
+
+ * `UserNotFoundError` no user with such id
+
+### Response [400] Bad Request
+
+ * `BadUserId` missing or anything other than non-empty string;
+ * `BadPassword` password is missing or too short (less than 8 characters);
 
 User indexed by auth token [/directory/v1/users/auth/:token]
 ------------------------------------------------------------
@@ -244,6 +263,19 @@ There cannot be more than 1 match (auth tokens are globally unique).
 }
 ```
 
+InvalidAuthTokenError
+### Response [401] Not Authorized
+
+ * `InvalidAuthTokenError` missing / invalid token
+
+### Response [404] Not Found
+
+ * `UserNotFoundError` token resolved to user id which was not found.
+
+### Response [400] Bad Request
+
+ * `BadUserId` missing or anything other than non-empty string;
+
 _note: this call exposes both public and private aliases_
 
 User indexed by alias [/directory/v1/users/alias/:type/:value]
@@ -259,11 +291,19 @@ There cannot be more than 1 match (aliases are contrained to be globally unique)
 
 ```json
 {
-    "user_id": "hrry23",
+    "id": "hrry23",
     "aliases": {
         "name": "Harry"
     }
 }
 ```
+
+### Response [404] Not Found
+
+ * `UserNotFoundError` alias resolved to user id which was not found.
+
+### Response [400] Bad Request
+
+ * `BadAlias` type or value, or both are something other than non-empty string;
 
 _note: this call exposes only public aliases_

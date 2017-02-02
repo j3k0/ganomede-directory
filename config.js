@@ -28,9 +28,21 @@ const parseLogLevel = (envValue) => {
   return bunyan[level];
 };
 
+const parseApiSecret = () => {
+  const valid = process.env.hasOwnProperty('API_SECRET')
+    && (typeof process.env.API_SECRET === 'string')
+    && (process.env.API_SECRET.length > 0);
+
+  if (!valid)
+    throw new Error('API_SECRET must be non-empty string');
+
+  return process.env.API_SECRET;
+};
+
 module.exports = {
   name: pkg.name,
   logLevel: parseLogLevel(process.env.BUNYAN_LEVEL),
+  secret: parseApiSecret(),
 
   http: {
     host: process.env.HOST || '0.0.0.0',
@@ -40,8 +52,22 @@ module.exports = {
     prefix: `/${pkg.api}`
   },
 
-  data: {
-    host: process.env.DATA_PORT_8080_TCP_ADDR || '127.0.0.1',
-    port: parseInt(process.env.DATA_PORT_8080_TCP_PORT, 10) || 8080
+  couch: {
+    url: (function () {
+      const host = process.env.COUCH_DIRECTORY_PORT_5984_TCP_ADDR || 'localhost';
+      const port = parseInt(process.env.COUCH_DIRECTORY_PORT_5984_TCP_PORT, 10) || 5984;
+      return `http://${host}:${port}/`;
+    }()),
+    name: process.env.COUCH_NAME || 'ganomede_directory_test',
+    designName: process.env.COUCH_VIEW || 'directory',
+    syncDesignAndExit: process.env.hasOwnProperty('COUCH_SYNC')
+  },
+
+  authdb: {
+    host: process.env.REDIS_AUTH_PORT_6379_TCP_ADDR || 'localhost',
+    port: parseInt(process.env.REDIS_AUTH_PORT_6379_TCP_PORT, 10) || 6379
   }
 };
+
+if (!module.parent)
+  require('./src/utils').debugPrint(module.exports);
