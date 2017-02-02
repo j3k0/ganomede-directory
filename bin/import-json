@@ -115,8 +115,30 @@ const sendRequest = (payload, callback) => {
   });
 };
 
+const usage = `
+Usage:
+
+  ./bin/import-json <path-to-json-file>
+
+Requires path to JSON file and following ENV vars:
+
+  - APP_ID         facebook app id
+  - API_SECRET     API secret for directory
+  - DIRECTORY_URL  url of directory service
+`.trim();
+
 const main = () => {
-  checkEnvVars();
+  try {
+    assert(process.argv.length === 3, 'Expected single argument: path to json file.');
+    checkEnvVars();
+  }
+  catch (error) {
+    console.error(usage);
+    console.error();
+    console.error(error);
+    process.exitCode = 1;
+    return;
+  }
 
   const file = normalizeInputPath();
   const input = require(file);
