@@ -9,6 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const assert = require('assert');
 const crypto = require('crypto');
 const lodash = require('lodash');
 const request = require('request');
@@ -28,6 +29,9 @@ const generatePassword = () => crypto.randomBytes(10).toString('hex');
 
 // Convert old format to new one that is expected by user creation endpoint.
 const convert = ({username, email, givenName, middleName}) => {
+  assert(!!username, `username must be non-empty string, got "${username}"`);
+  assert(!!email, `email must be non-empty string, got "${email}"`);
+
   const payload = {
     id: username,
     password: generatePassword(),
@@ -53,6 +57,8 @@ const convert = ({username, email, givenName, middleName}) => {
   };
 
   if ((givenName === 'Facebook') && middleName) {
+    assert(typeof middleName === 'string', `got facebook id, but middleName is not a string, got "${middleName}"`);
+
     payload.aliases.push({
       type: `facebook.id.${env.APP_ID}`,
       value: middleName,
