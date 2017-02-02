@@ -10,21 +10,28 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const glob = require('glob');
+const lodash = require('lodash');
+const request = require('request');
 const tagizer = require('ganomede-tagizer');
+const {debugInspect} = require('../src/utils');
 
-const FB_APP_ID = process.env.APP_ID;
+const env = {
+  APP_ID: process.env.APP_ID,
+  API_SECRET: process.env.API_SECRET,
+  DIRECTORY_URL: process.env.DIRECTORY_URL
+};
 
 // TODO:
 // That's a bit of placeholder, maybe we want something more memorable,
 // maybe we don't quite care, since user are expected to change it later.
 const generatePassword = () => crypto.randomBytes(10).toString('hex');
 
-class UserProfile {
-  constructor ({username, email, givenName, middleName}) {
-    this.id = username;
-    this.password = generatePassword();
-    this.aliases = [
+// Convert old format to new one that is expected by user creation endpoint.
+const convert = ({username, email, givenName, middleName}) => {
+  const payload = {
+    id: username,
+    password: generatePassword(),
+    aliases: [
       {
         type: 'email',
         value: email,
@@ -42,48 +49,79 @@ class UserProfile {
         value: tagizer(username),
         public: true
       }
-    ];
+    ]
+  };
 
-    if ((givenName === 'Facebook') && middleName) {
-      this.aliases.push({
-        type: `facebook.id.${FB_APP_ID}`,
-        value: middleName,
-        public: false
-      });
+  if ((givenName === 'Facebook') && middleName) {
+    payload.aliases.push({
+      type: `facebook.id.${env.APP_ID}`,
+      value: middleName,
+      public: false
+    });
+  }
+
+  return payload;
+};
+
+const checkEnvVars = () => {
+  lodash.entries(env).forEach(([name, value]) => {
+    const ok = process.env.hasOwnProperty(name) && (typeof value === 'string') && (value.length > 0);
+    if (!ok)
+      throw new Error(`Missing or invalid env var ${name}`);
+  });
+};
+
+const normalizeInputPath = () => {
+  const filePath = path.normalize(path.resolve(process.cwd(), process.argv[2]));
+  const stats = fs.statSync(filePath);
+
+  if (!stats.isFile())
+    throw new Error(`Not a file or missing: ${filePath}`);
+
+  return filePath;
+};
+
+const createPayload = (input) => {
+  return Object.assign(
+    {secret: env.API_SECRET},
+    convert(input)
+  );
+};
+
+const sendRequest = (payload, callback) => {
+  const options = {
+    method: 'post',
+    url: `${env.DIRECTORY_URL}/directory/v1/users`,
+    json: true,
+    body: payload
+  };
+
+  request(options, (err, res, body) => {
+    if (err)
+      return callback(err);
+
+    if (res.statusCode !== 200) {
+      const json = JSON.stringify(body, null, 2);
+      return callback(new Error(`Http${res.statusCode}:\n${json}`));
     }
-  }
 
-  toJSON () {
-    return {
-      id: this.id,
-      password: this.password,
-      aliases: this.aliases
-    };
-  }
-}
-
-const resolveDirectoryMask = (directoryPath) => {
-  return path.normalize(path.resolve(process.cwd(), directoryPath, '*.json'));
+    callback(null);
+  });
 };
 
 const main = () => {
-  // Validate Facebook App ID
-  if (!process.env.hasOwnProperty('APP_ID') || !process.env.APP_ID)
-    throw new Error(`Invalid Facebook App ID "${FB_APP_ID}"`);
+  checkEnvVars();
 
-  const directory = resolveDirectoryMask(process.argv[2]);
-  const files = glob.sync(directory);
+  const file = normalizeInputPath();
+  const input = require(file);
+  const payload = createPayload(input);
 
-  // We could probably make things async if this doesn't perform well.
-  files.forEach((inputPath, idx) => {
-    const outputPath = `${inputPath}.out`;
-    const output = new UserProfile(require(inputPath));
-    fs.writeFileSync(outputPath, JSON.stringify(output, null, 2), 'utf8');
-
-    if (idx === (files.length - 1))
-      console.error('Done!');
-    else if (idx && (idx % 100) === 0)
-      console.error(`[${new Date()}] Converted ${idx + 1} out of ${files.length}`);
+  sendRequest(payload, (err) => {
+    if (err) {
+      console.error(debugInspect({file, input, payload}));
+      console.error(err);
+      process.exitCode = 1;
+    }
   });
 };
 
