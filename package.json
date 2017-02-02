@@ -36,6 +36,8 @@
     "authdb": "^0.3.0",
     "bunyan": "^1.8.1",
     "curtain-down": "^1.0.0",
+    "ganomede-tagizer": "^1.0.0",
+    "glob": "^7.1.1",
     "lodash": "^4.17.2",
     "nano": "^6.2.0",
     "password-hash-and-salt": "^0.1.4",

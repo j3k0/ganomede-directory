@@ -1,0 +1,87 @@
+#!/usr/bin/env node
+/* eslint-disable no-console */
+'use strict';
+
+// Import user profiles to new format (userDoc + aliasDocs).
+//
+// For details, see:
+// https://github.com/j3k0/ganomede-directory/issues/3
+
+const fs = require('fs');
+const path = require('path');
+const glob = require('glob');
+const tagizer = require('ganomede-tagizer');
+
+const FB_APP_ID = process.env.APP_ID;
+
+const generatePassword = () => 'qwerty';
+
+class UserProfile {
+  constructor ({username, email, givenName, middleName}) {
+    this.id = username;
+    this.password = generatePassword();
+    this.aliases = [
+      {
+        type: 'email',
+        value: email,
+        public: false
+      },
+
+      {
+        type: 'name',
+        value: username,
+        public: true
+      },
+
+      {
+        type: 'tag',
+        value: tagizer(username),
+        public: true
+      }
+    ];
+
+    if ((givenName === 'Facebook') && middleName) {
+      this.aliases.push({
+        type: `facebook.id.${FB_APP_ID}`,
+        value: middleName,
+        public: false
+      });
+    }
+  }
+
+  toJSON () {
+    return {
+      id: this.id,
+      password: this.password,
+      aliases: this.aliases
+    };
+  }
+}
+
+const resolveDirectoryMask = (directoryPath) => {
+  return path.normalize(path.resolve(process.cwd(), directoryPath, '*.json'));
+};
+
+const main = () => {
+  // Validate Facebook App ID
+  if (!process.env.hasOwnProperty('APP_ID') || !process.env.APP_ID)
+    throw new Error(`Invalid Facebook App ID "${FB_APP_ID}"`);
+
+  const directory = resolveDirectoryMask(process.argv[2]);
+  const files = glob.sync(directory);
+
+  // We could probably make things async if this doesn't perform well.
+  files.forEach((inputPath, idx) => {
+    const outputPath = `${inputPath}.out`;
+    const output = new UserProfile(require(inputPath));
+    fs.writeFileSync(outputPath, JSON.stringify(output, null, 2), 'utf8');
+
+    if (idx === (files.length - 1))
+      console.error('Done!');
+    else if (idx && (idx % 100) === 0)
+      console.error(`[${new Date()}] Converted ${idx + 1} out of ${files.length}`);
+  });
+};
+
+if (!module.parent)
+  main();
