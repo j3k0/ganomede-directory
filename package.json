@@ -9,7 +9,7 @@
     "startw": "nodemon --watch src/ --watch index.js --watch config.js --exec \"npm start\"",
     "test": "BUNYAN_LEVEL=ERROR API_SECRET=1 mocha --bail --no-exit --throw-deprecation tests/helper.js 'tests/**/*.test.js'",
     "testw": "nodemon --watch src/ --watch tests/ --watch config.js --exec \"npm test\"",
-    "lint": "eslint src/ tests/ index.js config.js"
+    "lint": "eslint bin/* src/ tests/ index.js config.js"
   },
   "repository": {
     "type": "git",
@@ -28,7 +28,7 @@
     "deep-freeze": "0.0.1",
     "eslint": "^3.8.0",
     "mocha": "^3.1.2",
-    "supertest": "^2.0.0",
+    "supertest": "^3.0.0",
     "testdouble": "^1.10.2"
   },
   "dependencies": {
@@ -36,9 +36,11 @@
     "authdb": "^0.3.0",
     "bunyan": "^1.8.1",
     "curtain-down": "^1.0.0",
+    "ganomede-tagizer": "^1.0.1",
     "lodash": "^4.17.2",
     "nano": "^6.2.0",
     "password-hash-and-salt": "^0.1.4",
+    "request": "^2.79.0",
     "restify": "^4.1.1",
     "uuid": "^3.0.1"
   }

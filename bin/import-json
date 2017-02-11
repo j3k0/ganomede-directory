@@ -1,0 +1,157 @@
+#!/usr/bin/env node
+/* eslint-disable no-console */
+'use strict';
+
+// Import user profiles to new format (userDoc + aliasDocs).
+//
+// For details, see:
+// https://github.com/j3k0/ganomede-directory/issues/3
+
+const fs = require('fs');
+const path = require('path');
+const assert = require('assert');
+const crypto = require('crypto');
+const lodash = require('lodash');
+const request = require('request');
+const tagizer = require('ganomede-tagizer');
+const {debugInspect} = require('../src/utils');
+
+const env = {
+  APP_ID: process.env.APP_ID,
+  API_SECRET: process.env.API_SECRET,
+  DIRECTORY_URL: process.env.DIRECTORY_URL
+};
+
+// TODO:
+// That's a bit of placeholder, maybe we want something more memorable,
+// maybe we don't quite care, since user are expected to change it later.
+const generatePassword = () => crypto.randomBytes(10).toString('hex');
+
+// Convert old format to new one that is expected by user creation endpoint.
+const convert = ({username, email, givenName, middleName}) => {
+  assert(!!username, `username must be non-empty string, got "${username}"`);
+  assert(!!email, `email must be non-empty string, got "${email}"`);
+
+  const payload = {
+    id: username,
+    password: generatePassword(),
+    aliases: [
+      {
+        type: 'email',
+        value: email,
+        public: false
+      },
+
+      {
+        type: 'name',
+        value: username,
+        public: true
+      },
+
+      {
+        type: 'tag',
+        value: tagizer(username),
+        public: true
+      }
+    ]
+  };
+
+  if ((givenName === 'Facebook') && middleName) {
+    assert(typeof middleName === 'string', `got facebook id, but middleName is not a string, got "${middleName}"`);
+
+    payload.aliases.push({
+      type: `facebook.id.${env.APP_ID}`,
+      value: middleName,
+      public: false
+    });
+  }
+
+  return payload;
+};
+
+const checkEnvVars = () => {
+  lodash.entries(env).forEach(([name, value]) => {
+    const ok = process.env.hasOwnProperty(name) && (typeof value === 'string') && (value.length > 0);
+    if (!ok)
+      throw new Error(`Missing or invalid env var ${name}`);
+  });
+};
+
+const normalizeInputPath = () => {
+  const filePath = path.normalize(path.resolve(process.cwd(), process.argv[2]));
+  const stats = fs.statSync(filePath);
+
+  if (!stats.isFile())
+    throw new Error(`Not a file or missing: ${filePath}`);
+
+  return filePath;
+};
+
+const createPayload = (input) => {
+  return Object.assign(
+    {secret: env.API_SECRET},
+    convert(input)
+  );
+};
+
+const sendRequest = (payload, callback) => {
+  const options = {
+    method: 'post',
+    url: `${env.DIRECTORY_URL}/directory/v1/users`,
+    json: true,
+    body: payload
+  };
+
+  request(options, (err, res, body) => {
+    if (err)
+      return callback(err);
+
+    if (res.statusCode !== 200) {
+      const json = JSON.stringify(body, null, 2);
+      return callback(new Error(`Http${res.statusCode}:\n${json}`));
+    }
+
+    callback(null);
+  });
+};
+
+const usage = `
+Usage:
+
+  ./bin/import-json <path-to-json-file>
+
+Requires path to JSON file and following ENV vars:
+
+  - APP_ID         facebook app id
+  - API_SECRET     API secret for directory
+  - DIRECTORY_URL  url of directory service
+`.trim();
+
+const main = () => {
+  try {
+    assert(process.argv.length === 3, 'Expected single argument: path to json file.');
+    checkEnvVars();
+  }
+  catch (error) {
+    console.error(usage);
+    console.error();
+    console.error(error);
+    process.exitCode = 1;
+    return;
+  }
+
+  const file = normalizeInputPath();
+  const input = require(file);
+  const payload = createPayload(input);
+
+  sendRequest(payload, (err) => {
+    if (err) {
+      console.error(debugInspect({file, input, payload}));
+      console.error(err);
+      process.exitCode = 1;
+    }
+  });
+};
+
+if (!module.parent)
+  main();
