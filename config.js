@@ -60,7 +60,8 @@ module.exports = {
     }()),
     name: process.env.COUCH_DIRECTORY_DB_NAME || 'ganomede_directory_test',
     designName: process.env.COUCH_DIRECTORY_VIEW_NAME || 'directory',
-    syncDesignAndExit: process.env.hasOwnProperty('COUCH_DIRECTORY_SYNC')
+    syncDesignAndExit: !!process.env.COUCH_DIRECTORY_SYNC // Empty string or undefined
+                                                          // should be false
   },
 
   authdb: {
