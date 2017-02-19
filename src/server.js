@@ -15,27 +15,35 @@ const matchSecret = (obj, prop) => {
   return match;
 };
 
+const shouldLogRequest = (req) =>
+  (req.url !== `${config.http.prefix}/ping/_health_check`);
+
+const filteredLogger = (logger) => (req, res, next) => {
+  if (shouldLogRequest(req))
+    logger(req, res);
+  if (next)
+    next();
+};
+
 module.exports = () => {
   const server = restify.createServer({
     handleUncaughtExceptions: true,
     log: logger
   });
 
-  const requestLogger = (req, res, next) => {
-    req.log.info({req_id: req.id()}, `${req.method} ${req.url}`);
-    next();
-  };
+  const requestLogger = filteredLogger((req) =>
+    req.log.info({req_id: req.id()}, `${req.method} ${req.url}`));
   server.use(requestLogger);
 
   server.use(restify.queryParser());
   server.use(restify.bodyParser());
 
   // Audit requests
-  server.on('after', restify.auditLogger({log: logger}));
+  server.on('after', filteredLogger(restify.auditLogger({log: logger})));
 
   // Automatically add a request-id to the response
   function setRequestId (req, res, next) {
-    res.setHeader('x-request-id', req.id());
+    res.setHeader('X-Request-Id', req.id());
     return next();
   }
   server.use(setRequestId);
