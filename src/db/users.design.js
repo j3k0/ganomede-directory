@@ -1,12 +1,6 @@
 /* global emit:false getRow:false send:false */
 'use strict';
 
-// TODO
-//
-// Maybe add source-file comparison or git's modified date vs couch's one,
-// so we won't have to recalc the whole view due to upgrading node and changed formatting.
-// (Or maybe just add a version number, but that would require not forgetting to update it :)
-
 module.exports = {
   views: {
     // Basically, this emits all the docs we have on user,
@@ -50,13 +44,14 @@ module.exports = {
   },
 
   lists: {
-    // TODO
-    // This only works for single profile read. What about multiple with pages?
+    // Return all the things for single profile.
+    // (Looks like we won't need to fetch multiple profiles in one DB request.)
     profiles: String(function (head, req) {
-      // TODO
-      // Check that `key` query string param is present (`req.query.key`),
-      // meaning we want profile of that userId; throw Error otherwise.
-      // (because this does not make sense without it and will go over all docs).
+      // Check that `key` query string param is present (`req.query.key`)
+      // (because things do not make sense otherwise).
+      if ((typeof req.query.key !== 'string') || (req.query.key.length === 0))
+        throw new Error('MissingKeyParam');
+
       const profile = {
         id: null,
         hash: null,

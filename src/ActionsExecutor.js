@@ -1,6 +1,7 @@
 'use strict';
 
 const async = require('async');
+const logger = require('./logger');
 
 // Pass in array of actions, #run() to execute them in series,
 // If one fails, calls action.rollback() on previous ones in reverse order.
@@ -12,10 +13,12 @@ class ActionsExecutor {
   rollback (reason, rollbackQueue, callback) {
     async.eachSeries(
       rollbackQueue,
-      // TODO
-      // rollback() might error, but it should be okay to ignore it for now.
-      // (Also, make sure iterator's cb() is always called with no error.)
-      (action, cb) => action.rollback(cb),
+      (action, cb) => action.rollback(err => {
+        if (err)
+          logger.error('action rollback() failed', action, err);
+
+        cb();
+      }),
       (err) => callback(reason)
     );
   }
@@ -25,6 +28,8 @@ class ActionsExecutor {
   // TODO
   // probably worth accumulating all the errors,
   // instead of returning first one (sounds a bit "race condition"-y).
+  // (What this means is that same request can fail to different reason,
+  // does not matter too much I think.)
   runChecks (callback) {
     async.each(
       this.actions,

@@ -144,11 +144,7 @@ class Db {
   }
 
   // fetch _lists/<listname>/<viewname> with qs
-  //
   // callback(err, reply)
-  //
-  // TODO
-  // awkward, probably redo this.
   list (viewname, listname, qs, callback) {
     this.db.viewWithList(this.designName, viewname, listname, qs, (err, body, headers) => {
       return err
