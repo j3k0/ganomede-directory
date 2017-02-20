@@ -103,5 +103,37 @@ describe('ActionsExecutor', () => {
         done();
       });
     });
+
+    it('Failing rollbacks do not break others', (done) => {
+      let rolledback = false;
+
+      class Rollbackable extends BaseAction {
+        execute (cb) { setImmediate(cb, null); }
+        rollback (cb) {
+          rolledback = true;
+          setImmediate(cb);
+        }
+      }
+
+      class FailingRollback extends BaseAction {
+        execute (cb) { setImmediate(cb, null); }
+        rollback (cb) { setImmediate(cb, new Error('FailingRollback')); }
+      }
+
+      class FailingAction extends BaseAction {
+        execute (cb) { setImmediate(cb, new Error('FailingAction')); }
+      }
+
+      new ActionsExecutor([
+        new Rollbackable(),    // goes well
+        new FailingRollback(), // goes well, but rollback errors
+        new FailingAction()    // fails, so triggers above rollbacks
+      ]).run((err) => {
+        expect(err).to.be.instanceof(Error);
+        expect(err.message).to.equal('FailingAction');
+        expect(rolledback).to.be.equal(true);
+        done();
+      });
+    });
   });
 });
