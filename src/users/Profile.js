@@ -2,6 +2,7 @@
 
 // TODO
 // Maybe redo this to not iterate billion times…
+// On the other hand, not like there are going to hundreds of aliases :)
 const normalizeAliases = (aliases) => {
   const result = new Map();
 

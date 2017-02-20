@@ -28,6 +28,8 @@ class ActionsExecutor {
   // TODO
   // probably worth accumulating all the errors,
   // instead of returning first one (sounds a bit "race condition"-y).
+  // (What this means is that same request can fail to different reason,
+  // does not matter too much I think.)
   runChecks (callback) {
     async.each(
       this.actions,
