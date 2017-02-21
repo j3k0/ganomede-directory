@@ -21,7 +21,7 @@ const shouldLogRequest = (req) =>
 const filteredLogger = (logger) => (req, res, next) => {
   if (shouldLogRequest(req))
     logger(req, res);
-  if (next)
+  if (next && typeof next === 'function')
     next();
 };
 
