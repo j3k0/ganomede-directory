@@ -7,6 +7,7 @@ const {BaseError} = require('../errors');
 class DocumentNotFoundError extends BaseError {
   constructor (_id, _rev) {
     super('Document not found %j', {_id, _rev});
+    this.statusCode = 404;
   }
 
   static matches (nanoError) {
@@ -20,6 +21,7 @@ class DocumentNotFoundError extends BaseError {
 class RevisionMismatchError extends BaseError {
   constructor (_id, _rev) {
     super('Revision mismatch %j', {_id, _rev});
+    this.statusCode = 409;
   }
 
   static matches (nanoError) {

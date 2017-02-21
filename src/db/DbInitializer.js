@@ -14,6 +14,7 @@ class OutOfSyncError extends BaseError {
 
     super(`Database is out of sync:
   - database exists: ${databaseExists}\n${designsStatus}`);
+    this.statusCode = 500;
   }
 }
 
