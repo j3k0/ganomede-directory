@@ -1,10 +1,15 @@
 'use strict';
 
 const async = require('async');
-const uuid4 = require('uuid/v4');
+const crypto = require('crypto');
 const pbkdf = require('password-hash-and-salt');
 const Db = require('../db/db');
 const {UserNotFoundError, InvalidCredentialsError} = require('../errors');
+
+// Generate auth tokens which match regex /D[a-z0-9]+/
+// ('D' allows to identify which module generated the token)
+const token4 = () => crypto.randomBytes(4).readUInt32BE().toString(36);
+const genToken = () => 'D' + token4() + token4() + token4();
 
 class LoginsUsers {
   constructor (db, authdb) {
@@ -19,7 +24,7 @@ class LoginsUsers {
 
   // callback(err, authTokenString)
   createToken (userId, callback) {
-    const token = uuid4();
+    const token = genToken();
 
     this.authdb.addAccount(token, userId, (err) => {
       return err

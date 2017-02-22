@@ -41,7 +41,6 @@
     "nano": "^6.2.0",
     "password-hash-and-salt": "^0.1.4",
     "request": "^2.79.0",
-    "restify": "^4.1.1",
-    "uuid": "^3.0.1"
+    "restify": "^4.1.1"
   }
 }
