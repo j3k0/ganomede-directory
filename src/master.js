@@ -70,17 +70,20 @@ const die = (...args) => {
 const master = () => {
   const runningAsSyncScript = config.couch.syncDesignAndExit;
 
-  initDb(config.couch.syncDesignAndExit, (err) => {
-    if (err)
+  initDb(runningAsSyncScript, (err) => {
+    if (err) {
+      setTimeout(() => {}, 3600 * 1000);
       return die('Db sync failed', err);
+    }
 
     if (!runningAsSyncScript)
       return work();
 
     triggerDesignUpdate((err, couchTasks) => {
-      return err
-        ? die('Db was synced, but failed to trigger design doc update', err)
-        : logger.info(couchTasks, 'Db synced, view recalc triggered; here are current couch tasks');
+      setTimeout(() => {}, 3600 * 1000);
+      if (err)
+        return die('Db was synced, but failed to trigger design doc update', err);
+      logger.info(couchTasks, 'Db synced, view recalc triggered; here are current couch tasks');
     });
   });
 };
