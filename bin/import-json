@@ -17,7 +17,7 @@ const tagizer = require('ganomede-tagizer');
 const {debugInspect} = require('../src/utils');
 
 const env = {
-  APP_ID: process.env.APP_ID,
+  FACEBOOK_APP_ID: process.env.FACEBOOK_APP_ID,
   API_SECRET: process.env.API_SECRET,
   DIRECTORY_URL: process.env.DIRECTORY_URL
 };
@@ -60,7 +60,7 @@ const convert = ({username, email, givenName, middleName}) => {
     assert(typeof middleName === 'string', `got facebook id, but middleName is not a string, got "${middleName}"`);
 
     payload.aliases.push({
-      type: `facebook.id.${env.APP_ID}`,
+      type: `facebook.id.${env.FACEBOOK_APP_ID}`,
       value: middleName,
       public: false
     });
@@ -122,9 +122,9 @@ Usage:
 
 Requires path to JSON file and following ENV vars:
 
-  - APP_ID         facebook app id
-  - API_SECRET     API secret for directory
-  - DIRECTORY_URL  url of directory service
+  - FACEBOOK_APP_ID  Facebook app id
+  - API_SECRET       API secret for directory
+  - DIRECTORY_URL    url of directory service
 `.trim();
 
 const main = () => {
