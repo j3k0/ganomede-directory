@@ -3,6 +3,7 @@
 const async = require('async');
 const nano = require('nano');
 const {BaseError} = require('../errors');
+const log = require('../logger');
 
 class DocumentNotFoundError extends BaseError {
   constructor (_id, _rev) {
@@ -29,10 +30,29 @@ class RevisionMismatchError extends BaseError {
   }
 }
 
+const debugDb = (db) => ({
+  head: (docId, cb) => {
+    log.debug({docId}, "db.debug");
+    db.head(docId, cb);
+  },
+  get: (docId, cb) => {
+    log.debug({docId}, "db.get");
+    db.get(docId, cb);
+  },
+  insert: (body, docId, cb) => {
+    log.debug({docId, body}, "db.insert");
+    db.insert(body, docId, cb);
+  },
+  viewWithList: (designName, viewname, listname, qs, cb) => {
+    log.debug({designName, viewname, listname, qs}, "db.viewWithList");
+    db.viewWithList(designName, viewname, listname, qs, cb);
+  }
+})
+
 class Db {
   // new DB(config.couch)
   constructor ({url, name, designName}) {
-    this.db = nano(url).use(name);
+    this.db = debugDb(nano(url).use(name));
     this.designName = designName;
   }
 
