@@ -32,22 +32,22 @@ class RevisionMismatchError extends BaseError {
 
 const debugDb = (db) => ({
   head: (docId, cb) => {
-    log.debug({docId}, "db.debug");
+    log.debug({docId}, 'db.debug');
     db.head(docId, cb);
   },
   get: (docId, cb) => {
-    log.debug({docId}, "db.get");
+    log.debug({docId}, 'db.get');
     db.get(docId, cb);
   },
   insert: (body, docId, cb) => {
-    log.debug({docId, body}, "db.insert");
+    log.debug({docId, body}, 'db.insert');
     db.insert(body, docId, cb);
   },
   viewWithList: (designName, viewname, listname, qs, cb) => {
-    log.debug({designName, viewname, listname, qs}, "db.viewWithList");
+    log.debug({designName, viewname, listname, qs}, 'db.viewWithList');
     db.viewWithList(designName, viewname, listname, qs, cb);
   }
-})
+});
 
 class Db {
   // new DB(config.couch)

@@ -30,7 +30,7 @@ describe('FindsProfiles', () => {
       const authdb = td.object(['getAccount']);
 
       td.when(authdb.getAccount('auth-token', td.callback))
-        .thenCallback(null, {username:'joe'});
+        .thenCallback(null, {username: 'joe'});
 
       td.when(BuildsProfiles.build('joe', td.callback))
         .thenCallback(null, profileRef);

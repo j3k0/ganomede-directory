@@ -48,7 +48,7 @@ module.exports = ({db, authdb, prefix, server}) => {
 
     createsUsers.create(id, password, aliases, (err, json) => {
       if (err)
-        return sendHttpError(next, err)
+        return sendHttpError(next, err);
       res.json(json);
       next();
     });
@@ -60,7 +60,7 @@ module.exports = ({db, authdb, prefix, server}) => {
 
     changesPasswords.change(userId, newPassword, (err) => {
       if (err)
-        return sendHttpError(next, err)
+        return sendHttpError(next, err);
       res.send(200, '');
       next();
     });
@@ -72,7 +72,7 @@ module.exports = ({db, authdb, prefix, server}) => {
 
     addsAliases.add(userId, aliases, (err) => {
       if (err)
-        return sendHttpError(next, err)
+        return sendHttpError(next, err);
       res.send(200, '');
       next();
     });
@@ -101,7 +101,7 @@ module.exports = ({db, authdb, prefix, server}) => {
 
   const sendProfileBack = (includePrivateDate, res, next) => (err, profile) => {
     if (err)
-      return sendHttpError(next, err)
+      return sendHttpError(next, err);
     res.json(includePrivateDate ? profile.private() : profile.public());
     next();
   };
@@ -138,7 +138,7 @@ module.exports = ({db, authdb, prefix, server}) => {
 
     loginsUsers.login(id, password, (err, token) => {
       if (err)
-        return sendHttpError(next, err)
+        return sendHttpError(next, err);
       res.json({id, token});
       next();
     });

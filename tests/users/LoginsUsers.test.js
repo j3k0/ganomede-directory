@@ -20,7 +20,7 @@ describe('LoginsUsers', () => {
 
       td.when(authdb.addAccount(
         td.matchers.isA(String),
-        td.matchers.contains({username:'userid'}),
+        td.matchers.contains({username: 'userid'}),
         td.callback))
           .thenCallback(null, 'OK'); // Matches redis reply from authdb sources,
                                     // but `OK` part is w/ever, only err matters.
@@ -43,7 +43,7 @@ describe('LoginsUsers', () => {
 
       td.when(authdb.addAccount(
         td.matchers.isA(String),
-        td.matchers.contains({username:'jdoe'}),
+        td.matchers.contains({username: 'jdoe'}),
         td.callback))
           .thenCallback(null, 'OK');
 

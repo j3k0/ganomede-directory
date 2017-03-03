@@ -32,7 +32,7 @@ const filteredLogger = (errorsOnly, logger) => (req, res, next) => {
 };
 
 module.exports = () => {
-  logger.info({env: process.env}, "environment");
+  logger.info({env: process.env}, 'environment');
   const server = restify.createServer({
     handleUncaughtExceptions: true,
     log: logger
