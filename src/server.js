@@ -16,22 +16,29 @@ const matchSecret = (obj, prop) => {
 };
 
 const shouldLogRequest = (req) =>
-  (req.url !== `${config.http.prefix}/ping/_health_check`);
+  (req.url !== `/${config.http.prefix}/ping/_health_check`);
 
-const filteredLogger = (logger) => (req, res, next) => {
-  if (shouldLogRequest(req))
+const shouldLogResponse = (res) =>
+  (res && res.statusCode >= 500);
+
+const filteredLogger = (errorsOnly, logger) => (req, res, next) => {
+  const logError = errorsOnly && shouldLogResponse(res);
+  const logInfo = !errorsOnly && (
+    shouldLogRequest(req) || shouldLogResponse(res));
+  if (logError || logInfo)
     logger(req, res);
   if (next && typeof next === 'function')
     next();
 };
 
 module.exports = () => {
+  logger.info({env: process.env}, "environment");
   const server = restify.createServer({
     handleUncaughtExceptions: true,
     log: logger
   });
 
-  const requestLogger = filteredLogger((req) =>
+  const requestLogger = filteredLogger(false, (req) =>
     req.log.info({req_id: req.id()}, `${req.method} ${req.url}`));
   server.use(requestLogger);
 
@@ -39,10 +46,12 @@ module.exports = () => {
   server.use(restify.bodyParser());
 
   // Audit requests
-  server.on('after', filteredLogger(restify.auditLogger({log: logger})));
+  server.on('after', filteredLogger(process.env.NODE_ENV === 'production',
+    restify.auditLogger({log: logger, body: true})));
 
   // Automatically add a request-id to the response
   function setRequestId (req, res, next) {
+    req.log = req.log.child({req_id: req.id()});
     res.setHeader('X-Request-Id', req.id());
     return next();
   }
