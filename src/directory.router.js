@@ -47,9 +47,10 @@ module.exports = ({db, authdb, prefix, server}) => {
       return badAliases(next);
 
     createsUsers.create(id, password, aliases, (err, json) => {
-      return err
-        ? sendHttpError(next, err)
-        : res.json(json);
+      if (err)
+        return sendHttpError(next, err)
+      res.json(json);
+      next();
     });
   };
 
@@ -58,9 +59,10 @@ module.exports = ({db, authdb, prefix, server}) => {
       return badPassword(next);
 
     changesPasswords.change(userId, newPassword, (err) => {
-      return err
-        ? sendHttpError(next, err)
-        : res.send(200, '');
+      if (err)
+        return sendHttpError(next, err)
+      res.send(200, '');
+      next();
     });
   };
 
@@ -69,9 +71,10 @@ module.exports = ({db, authdb, prefix, server}) => {
       return badAliases(next);
 
     addsAliases.add(userId, aliases, (err) => {
-      return err
-        ? sendHttpError(next, err)
-        : res.send(200, '');
+      if (err)
+        return sendHttpError(next, err)
+      res.send(200, '');
+      next();
     });
   };
 
@@ -97,9 +100,10 @@ module.exports = ({db, authdb, prefix, server}) => {
   };
 
   const sendProfileBack = (includePrivateDate, res, next) => (err, profile) => {
-    return err
-      ? sendHttpError(next, err)
-      : res.json(includePrivateDate ? profile.private() : profile.public());
+    if (err)
+      return sendHttpError(next, err)
+    res.json(includePrivateDate ? profile.private() : profile.public());
+    next();
   };
 
   const lookupWithUserId = (req, res, next) => {
@@ -133,9 +137,10 @@ module.exports = ({db, authdb, prefix, server}) => {
       return badPassword(next);
 
     loginsUsers.login(id, password, (err, token) => {
-      return err
-        ? sendHttpError(next, err)
-        : res.json({id, token});
+      if (err)
+        return sendHttpError(next, err)
+      res.json({id, token});
+      next();
     });
   };
 
