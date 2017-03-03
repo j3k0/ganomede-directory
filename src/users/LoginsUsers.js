@@ -26,7 +26,7 @@ class LoginsUsers {
   createToken (userId, callback) {
     const token = genToken();
 
-    this.authdb.addAccount(token, userId, (err) => {
+    this.authdb.addAccount(token, {username: userId}, (err) => {
       return err
         ? callback(err)
         : callback(null, token);
