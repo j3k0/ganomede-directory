@@ -2,6 +2,7 @@
 
 const Profile = require('./Profile');
 const {UserNotFoundError} = require('../errors');
+const restify = require('restify');
 
 class BuildsProfiles {
   constructor (db) {
@@ -11,6 +12,8 @@ class BuildsProfiles {
   // Give userId, receive user profile object that can be sent back.
   // callback(err, profile)
   build (userId, callback) {
+    if (!userId)
+      return callback(new restify.BadRequestError('userId is missing'));
     this.db.list('rawProfiles', 'profiles', {key: userId}, (err, json) => {
       if (err)
         return callback(err);
