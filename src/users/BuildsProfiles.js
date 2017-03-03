@@ -12,8 +12,8 @@ class BuildsProfiles {
   // Give userId, receive user profile object that can be sent back.
   // callback(err, profile)
   build (userId, callback) {
-    if (!userId)
-      return callback(new restify.BadRequestError('userId is missing'));
+    if (!userId || typeof userId !== 'string')
+      return callback(new restify.BadRequestError('userId is missing or invalid'));
     this.db.list('rawProfiles', 'profiles', {key: userId}, (err, json) => {
       if (err)
         return callback(err);

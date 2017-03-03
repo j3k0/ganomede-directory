@@ -21,9 +21,9 @@ class FindsProfiles {
   byAuthToken (token, callback) {
     async.waterfall([
       (cb) => this.authdb.getAccount(token, cb),
-      (userId, cb) => {
-        return userId
-          ? this.byUserId(userId, cb)
+      (account, cb) => {
+        return (account && account.username)
+          ? this.byUserId(account.username, cb)
           : cb(new InvalidAuthTokenError());
       }
     ], callback);
