@@ -27,7 +27,13 @@ describe('CreatesUsers', () => {
 
     new CreatesUsers().create(userId, password, aliases, (err, response) => {
       expect(err).to.be.null;
-      expect(response).to.eql({id: 'jdoe'});
+      expect(response).to.eql({
+        id: 'jdoe',
+        aliases: {
+          email: 'jdoe@example.com',
+          name: 'jdoe'
+        }
+      });
       done();
     });
   });
