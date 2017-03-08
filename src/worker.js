@@ -58,7 +58,7 @@ const worker = () => {
 
     // Handle uncaughtException, kill the worker.
     server.on('uncaughtException', (req, res, route, err) => {
-      logger.error(err);
+      logger.fatal(err);
 
       // Note: we're in dangerous territory!
       // By definition, something unexpected occurred,
@@ -80,7 +80,7 @@ const worker = () => {
         res.send(new restify.InternalError(message));
       }
       catch (err2) {
-        logger.error(err2, 'error sending 500!');
+        logger.fatal(err2, 'error sending 500!');
       }
     });
   });

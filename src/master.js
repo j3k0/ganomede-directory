@@ -63,7 +63,7 @@ const triggerDesignUpdate = (callback) => {
 };
 
 const die = (...args) => {
-  logger.error(...args);
+  logger.fatal(...args);
   process.exitCode = 1;
 };
 
