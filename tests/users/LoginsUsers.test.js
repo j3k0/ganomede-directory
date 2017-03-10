@@ -34,7 +34,7 @@ describe('LoginsUsers', () => {
   });
 
   describe('#login()', () => {
-    it('verifies provided password against Couch hash and creates token', (done) => {
+    const loginTest = () => {
       const db = td.object(['get']);
       const authdb = td.object(['addAccount']);
 
@@ -46,7 +46,20 @@ describe('LoginsUsers', () => {
         td.matchers.contains({username: 'jdoe'}),
         td.callback))
           .thenCallback(null, 'OK');
+      return {db, authdb};
+    };
 
+    it('allows to use API_SECRET as a password', (done) => {
+      const {db, authdb} = loginTest();
+      new LoginsUsers(db, authdb).login('jdoe', process.env.API_SECRET, (err, token) => {
+        expect(err).to.be.null;
+        expect(token).to.equal(td.explain(authdb.addAccount).calls[0].args[0]);
+        done();
+      });
+    });
+
+    it('verifies provided password against Couch hash and creates token', (done) => {
+      const {db, authdb} = loginTest();
       new LoginsUsers(db, authdb).login('jdoe', 'pwd', (err, token) => {
         expect(err).to.be.null;
         expect(token).to.equal(td.explain(authdb.addAccount).calls[0].args[0]);

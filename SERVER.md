@@ -58,7 +58,7 @@ As such:
     * One document per user (using the user's id)
     * Views to map aliases to a user.
  * AuthDB:
-    * For authentication tokens (a map **token** &rArr; **user id**)
+    * For authentication tokens (a map **token** &rArr; **{username: id}**)
       * Because implementing expiry with Redis is nice and easy.
       * Also to keep compatibility with the existing services who expect direct access to a Redis authDB database.
 
@@ -203,6 +203,8 @@ Or, like some people call this, login.
     "password": "my-password"
 }
 ```
+
+**Note**: `API_SECRET` is also considered a valid password.
 
 ### response [200] OK
 

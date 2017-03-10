@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node index.js",
     "startw": "nodemon --watch src/ --watch index.js --watch config.js --exec \"npm start\"",
-    "test": "LOG_LEVEL=FATAL API_SECRET=1 mocha --bail --no-exit --throw-deprecation tests/helper.js 'tests/**/*.test.js'",
+    "test": "LOG_LEVEL=FATAL API_SECRET=12345678 mocha --bail --no-exit --throw-deprecation tests/helper.js 'tests/**/*.test.js'",
     "testw": "nodemon --watch src/ --watch tests/ --watch config.js --exec \"npm test\"",
     "lint": "eslint bin/* src/ tests/ index.js config.js"
   },
