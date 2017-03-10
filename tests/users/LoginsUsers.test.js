@@ -25,7 +25,7 @@ describe('LoginsUsers', () => {
         td.callback))
           .thenCallback(null, 'OK'); // Matches redis reply from authdb sources,
                                      // but `OK` part is w/ever, only err matters.
-      var loginsUsers = new LoginsUsers({}, authdb);
+      const loginsUsers = new LoginsUsers({}, authdb);
       return {loginsUsers, authdb};
     };
 
