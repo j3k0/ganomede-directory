@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node index.js",
     "startw": "nodemon --watch src/ --watch index.js --watch config.js --exec \"npm start\"",
-    "test": "LOG_LEVEL=FATAL API_SECRET=1 mocha --bail --no-exit --throw-deprecation tests/helper.js 'tests/**/*.test.js'",
+    "test": "LOG_LEVEL=FATAL API_SECRET=12345678 mocha --bail --no-exit --throw-deprecation tests/helper.js 'tests/**/*.test.js'",
     "testw": "nodemon --watch src/ --watch tests/ --watch config.js --exec \"npm test\"",
     "lint": "eslint bin/* src/ tests/ index.js config.js"
   },
@@ -15,7 +15,9 @@
     "type": "git",
     "url": "git+https://github.com/j3k0/ganomede-directory.git"
   },
-  "keywords": ["ganomede"],
+  "keywords": [
+    "ganomede"
+  ],
   "author": "Fovea.cc",
   "license": "GPL",
   "bugs": {
@@ -36,7 +38,7 @@
     "authdb": "^0.3.0",
     "bunyan": "^1.8.1",
     "curtain-down": "^1.0.0",
-    "ganomede-tagizer": "^1.0.1",
+    "ganomede-tagizer": "^2.0.0",
     "lodash": "^4.17.2",
     "nano": "^6.2.0",
     "password-hash-and-salt": "^0.1.4",

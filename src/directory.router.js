@@ -128,7 +128,7 @@ module.exports = ({db, authdb, prefix, server}) => {
   };
 
   const loginUser = (req, res, next) => {
-    const {id, password} = req.body;
+    const {id, token, password} = req.body;
 
     if (!id)
       return badUserId(next);
@@ -136,7 +136,7 @@ module.exports = ({db, authdb, prefix, server}) => {
     if (!password)
       return badPassword(next);
 
-    loginsUsers.login(id, password, (err, token) => {
+    loginsUsers.login(id, password, token, (err, token) => {
       if (err)
         return sendHttpError(next, err);
       res.json({id, token});
