@@ -8,6 +8,7 @@ if (!module.parent) {
 }
 else {
   module.exports = {
-    createClient: require('./lib/client.js').createClient
+    createClient: require('./lib/client').createClient,
+    createAuthdbClient: require('./lib/authdb-client').createAuthdbClient
   };
 }

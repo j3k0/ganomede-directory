@@ -27,11 +27,28 @@ Options:
  - `apiSecret` - default to env var `API_SECRET`
  - `log` - a bunyan logger, will create one for you if not specified
 
-### directoryClient.authenticate
+### directoryClient.authenticate(credentials, callback)
+
+ - `credentials`: object `{id, password, req_id}`
+   - `id`: user's identifier
+   - `password`: user's password
+   - `req_id` (optional): request identifier (for tracking)
+ - `callback`: function `(err, result) => {}`
+   - `err`: a restify error
+   - `result`: object `{id, token}`
+
 ### directoryClient.addAccount
 ### directoryClient.byId
 ### directoryClient.byAlias
-### directoryClient.byToken
+### directoryClient.byToken(options, callback)
+
+ - `options`: object `{token, req_id}`
+   - `token`: authentication token of the user to retrieve
+   - `req_id` (optional): request identifier (for tracking)
+ - `callback`: function `(err, account) => {}`
+   - `err`: a restify error
+   - `account`: Directory Account object (see [SERVER.md](./SERVER.md) &rarr; data structures)
+
 ### directoryClient.editAccount
 
 ## Authdb Client
@@ -53,4 +70,4 @@ An object with the following fields:
 
 ### authdbClient.addAccount(token, account, (err, result) => {})
 
-Expects `account.username` to be filled. Requires `apiSecret` in the options.
+Expects `account.username` to be filled. Requires `apiSecret` in the options (or as environment variable).
