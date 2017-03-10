@@ -15,7 +15,8 @@ describe('LoginsUsers', () => {
   });
 
   describe('#createToken()', () => {
-    it('creates authdb token for userid', (done) => {
+
+    const tokenTest = () => {
       const authdb = td.object(['addAccount']);
 
       td.when(authdb.addAccount(
@@ -23,11 +24,23 @@ describe('LoginsUsers', () => {
         td.matchers.contains({username: 'userid'}),
         td.callback))
           .thenCallback(null, 'OK'); // Matches redis reply from authdb sources,
-                                    // but `OK` part is w/ever, only err matters.
+                                     // but `OK` part is w/ever, only err matters.
+      var loginsUsers = new LoginsUsers({}, authdb);
+      return {loginsUsers, authdb};
+    };
 
-      new LoginsUsers({}, authdb).createToken('userid', (err, token) => {
+    it('creates authdb token for userid', (done) => {
+      const {loginsUsers, authdb} = tokenTest();
+      loginsUsers.createToken('userid', null, (err, token) => {
         expect(err).to.be.null;
         expect(token).to.equal(td.explain(authdb.addAccount).calls[0].args[0]);
+        done();
+      });
+    });
+    it('allows to force the value for the token', (done) => {
+      const {loginsUsers} = tokenTest();
+      loginsUsers.createToken('userid', 'bob', (err, token) => {
+        expect(token).to.equal('bob');
         done();
       });
     });
@@ -51,16 +64,34 @@ describe('LoginsUsers', () => {
 
     it('allows to use API_SECRET as a password', (done) => {
       const {db, authdb} = loginTest();
-      new LoginsUsers(db, authdb).login('jdoe', process.env.API_SECRET, (err, token) => {
+      new LoginsUsers(db, authdb).login('jdoe', process.env.API_SECRET, null, (err, token) => {
         expect(err).to.be.null;
         expect(token).to.equal(td.explain(authdb.addAccount).calls[0].args[0]);
         done();
       });
     });
 
+    it('allows to change token when password is API_SECRET', (done) => {
+      const {db, authdb} = loginTest();
+      new LoginsUsers(db, authdb).login('jdoe', process.env.API_SECRET, 'my-token', (err, token) => {
+        expect(err).to.be.null;
+        expect(token).to.equal('my-token');
+        done();
+      });
+    });
+
+    it('disregards the requested token when password is not API_SECRET', (done) => {
+      const {db, authdb} = loginTest();
+      new LoginsUsers(db, authdb).login('jdoe', 'pwd', 'my-token', (err, token) => {
+        expect(err).to.be.null;
+        expect(token).not.to.equal('my-token');
+        done();
+      });
+    });
+
     it('verifies provided password against Couch hash and creates token', (done) => {
       const {db, authdb} = loginTest();
-      new LoginsUsers(db, authdb).login('jdoe', 'pwd', (err, token) => {
+      new LoginsUsers(db, authdb).login('jdoe', 'pwd', null, (err, token) => {
         expect(err).to.be.null;
         expect(token).to.equal(td.explain(authdb.addAccount).calls[0].args[0]);
         done();

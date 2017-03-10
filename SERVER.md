@@ -204,7 +204,9 @@ Or, like some people call this, login.
 }
 ```
 
-**Note**: `API_SECRET` is also considered a valid password.
+**Notes**:
+ - `API_SECRET` is also considered a valid password
+ - it's possible to specify your own value for `token`: add a `token` field in the request body
 
 ### response [200] OK
 

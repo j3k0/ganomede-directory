@@ -24,8 +24,8 @@ class LoginsUsers {
   }
 
   // callback(err, authTokenString)
-  createToken (userId, callback) {
-    const token = genToken();
+  createToken (userId, token, callback) {
+    token = token || genToken();
 
     this.authdb.addAccount(token, {username: userId}, (err) => {
       return err
@@ -35,15 +35,15 @@ class LoginsUsers {
   }
 
   // callback(err, authtoken)
-  login (userId, password, callback) {
+  login (userId, password, token, callback) {
     if (config.secret === password)
-      return this.createToken(userId, callback);
+      return this.createToken(userId, token, callback);
     async.waterfall([
       (cb) => this.db.get(`id:${userId}`, cb),
       (userDoc, cb) => pbkdf(password).verifyAgainst(userDoc.hash, cb),
       (matches, cb) => {
         return matches
-          ? this.createToken(userId, cb)
+          ? this.createToken(userId, null, cb)
           : cb(new InvalidCredentialsError());
       }
     ], (err, token) => {
