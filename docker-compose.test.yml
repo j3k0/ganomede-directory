@@ -1,0 +1,56 @@
+sut:
+    build: .
+    command: sh -c "npm t && ./tests/rest_api.sh"
+    volumes:
+     - ./src:/home/app/code/src
+     - ./tests:/home/app/code/tests
+     - ./index.js:/home/app/code/index.js
+     - ./config.js:/home/app/code/config.js
+    links:
+     - app
+    environment:
+     - "API_SECRET=1234"
+     - "BASE_URL=http://app:8000"
+     - "LOG_LEVEL=error"
+     - "NODE_ENV="
+
+app:
+    build: .
+    command: node index.js | ./node_modules/.bin/bunyan -l 0
+    volumes:
+     - ./src:/home/app/code/src
+     - ./tests:/home/app/code/tests
+     - ./index.js:/home/app/code/index.js
+     - ./config.js:/home/app/code/config.js
+    ports:
+     - "8000:8000"
+    links:
+     - couch:couch_directory
+     - redisAuth:redis_auth
+     - sync
+    environment:
+     - "API_SECRET=1234"
+     - "LOG_LEVEL=info"
+     - "NODE_ENV="
+
+sync:
+    build: .
+    command: node index.js | ./node_modules/.bin/bunyan -l 0
+    volumes:
+     - ./src:/home/app/code/src
+     - ./tests:/home/app/code/tests
+     - ./index.js:/home/app/code/index.js
+     - ./config.js:/home/app/code/config.js
+    links:
+     - couch:couch_directory
+     - redisAuth:redis_auth
+    environment:
+     - "API_SECRET=1234"
+     - "COUCH_DIRECTORY_SYNC=1"
+
+couch:
+    image: klaemo/couchdb:1.6.1
+
+redisAuth:
+    image: redis:alpine
+
