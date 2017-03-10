@@ -7,5 +7,7 @@ if (!module.parent) {
   cluster.isMaster ? master() : worker();
 }
 else {
-  module.exports = require('./client.js');
+  module.exports = {
+    createClient: require('./lib/client.js').createClient
+  };
 }
