@@ -5,3 +5,7 @@ machine:
 test:
   pre:
     - npm run lint
+  post:
+    - npm run coverage
+    - npm install https://github.com/nickmerwin/node-coveralls
+    - cat ./coverage/lcov.info | ./node_modules/.bin/coveralls
