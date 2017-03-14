@@ -10,7 +10,7 @@
     "coverage": "LOG_LEVEL=FATAL API_SECRET=12345678 istanbul cover _mocha -- -b tests/helper.js tests/**/*.test.js && istanbul report",
     "test": "LOG_LEVEL=FATAL API_SECRET=12345678 mocha --bail --no-exit --throw-deprecation tests/helper.js 'tests/**/*.test.js'",
     "testw": "nodemon --watch src/ --watch tests/ --watch config.js --exec \"npm test\"",
-    "lint": "eslint bin/* src/ tests/ index.js config.js"
+    "lint": "eslint bin src tests index.js config.js"
   },
   "repository": {
     "type": "git",

@@ -101,7 +101,7 @@ module.exports = ({db, authdb, prefix, server}) => {
   };
 
   const sendProfileBack = (includePrivateDate, res, next) => (err, profile) => {
-    logger.debug({err, profile}, "directory.router.sendProfileBack");
+    logger.debug({err, profile}, 'directory.router.sendProfileBack');
     if (err)
       return sendHttpError(next, err);
     res.json(includePrivateDate ? profile.private() : profile.public());

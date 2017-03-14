@@ -22,7 +22,7 @@ class FindsProfiles {
   byAuthToken (token, callback) {
     async.waterfall([
       (cb) => {
-        logger.debug({token},"authdb.getAccount");
+        logger.debug({token}, 'authdb.getAccount');
         this.authdb.getAccount(token, (err, account) => {
           if (err)
             cb(new InvalidAuthTokenError(err));
@@ -31,7 +31,7 @@ class FindsProfiles {
         });
       },
       (account, cb) => {
-        logger.debug({account},"authdb.getAccount.response");
+        logger.debug({account}, 'authdb.getAccount.response');
         return (account && account.username)
           ? this.byUserId(account.username, cb)
           : cb(new InvalidAuthTokenError());
