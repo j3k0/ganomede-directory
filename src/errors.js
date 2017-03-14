@@ -92,15 +92,15 @@ class UserNotFoundError extends BaseError {
 }
 
 class InvalidAuthTokenError extends BaseError {
-  constructor () {
-    super('Invalid auth token');
+  constructor (message) {
+    super(message || 'Invalid auth token');
     this.statusCode = 401;
   }
 }
 
 class InvalidCredentialsError extends BaseError {
-  constructor () {
-    super('Invalid credentials');
+  constructor (message) {
+    super(message || 'Invalid credentials');
     this.statusCode = 401;
   }
 }

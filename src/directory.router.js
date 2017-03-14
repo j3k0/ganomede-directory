@@ -1,6 +1,7 @@
 'use strict';
 
 const restify = require('restify');
+const logger = require('./logger');
 const {RequestValidationError, sendHttpError, InvalidAuthTokenError} = require('./errors');
 const FindsProfiles = require('./users/FindsProfiles');
 const LoginsUsers = require('./users/LoginsUsers');
@@ -100,6 +101,7 @@ module.exports = ({db, authdb, prefix, server}) => {
   };
 
   const sendProfileBack = (includePrivateDate, res, next) => (err, profile) => {
+    logger.debug({err, profile}, "directory.router.sendProfileBack");
     if (err)
       return sendHttpError(next, err);
     res.json(includePrivateDate ? profile.private() : profile.public());

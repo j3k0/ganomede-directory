@@ -6,6 +6,7 @@
 const async = require('async');
 const BuildsProfiles = require('./BuildsProfiles');
 const {InvalidAuthTokenError} = require('../errors');
+const logger = require('../logger');
 
 class FindsProfiles {
   constructor (db, authdb) {
@@ -20,8 +21,17 @@ class FindsProfiles {
 
   byAuthToken (token, callback) {
     async.waterfall([
-      (cb) => this.authdb.getAccount(token, cb),
+      (cb) => {
+        logger.debug({token},"authdb.getAccount");
+        this.authdb.getAccount(token, (err, account) => {
+          if (err)
+            cb(new InvalidAuthTokenError(err));
+          else
+            cb(null, account);
+        });
+      },
       (account, cb) => {
+        logger.debug({account},"authdb.getAccount.response");
         return (account && account.username)
           ? this.byUserId(account.username, cb)
           : cb(new InvalidAuthTokenError());

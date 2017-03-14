@@ -61,3 +61,6 @@ it 'handles wrong requests'
     outputExcludes "InternalError"
     CURL $PREFIX/users/id/noalias
     outputIncludes noalias
+    CURL $PREFIX/users/auth/1234
+    outputExcludes "InternalError"
+    outputIncludes "InvalidAuthTokenError"

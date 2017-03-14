@@ -30,7 +30,7 @@ app:
      - sync
     environment:
      - "API_SECRET=1234"
-     - "LOG_LEVEL=info"
+     - "LOG_LEVEL=debug"
      - "NODE_ENV="
 
 sync:
