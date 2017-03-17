@@ -1,6 +1,6 @@
 {
   "name": "ganomede-directory",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "api": "directory/v1",
   "description": "directory of users microservice",
   "main": "index.js",
