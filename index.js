@@ -7,5 +7,8 @@ if (!module.parent) {
   cluster.isMaster ? master() : worker();
 }
 else {
-  module.exports = require('./client.js');
+  module.exports = {
+    createClient: require('./lib/client').createClient,
+    createAuthdbClient: require('./lib/authdb-client').createAuthdbClient
+  };
 }

@@ -1,6 +1,7 @@
 'use strict';
 
 const restify = require('restify');
+const logger = require('./logger');
 const {RequestValidationError, sendHttpError, InvalidAuthTokenError} = require('./errors');
 const FindsProfiles = require('./users/FindsProfiles');
 const LoginsUsers = require('./users/LoginsUsers');
@@ -10,14 +11,14 @@ const AddsAliases = require('./users/AddsAliases');
 
 const nonemptyString = str => (typeof str === 'string') && (str.length > 0);
 const validateUserId = nonemptyString;
-const validatePassword = pwd => nonemptyString(pwd) && (pwd.length >= 8);
+const validatePassword = pwd => nonemptyString(pwd) && (pwd.length >= 6);
 const validateAlias = alias => (typeof alias === 'object') && (!!alias)
   && nonemptyString(alias.type) && nonemptyString(alias.value)
   && (!alias.hasOwnProperty('public') || (typeof alias.public === 'boolean'));
 const validateAliases = aliases => Array.isArray(aliases) && (aliases.length > 0) && aliases.every(validateAlias);
 
 const badUserId = next => sendHttpError(next, new RequestValidationError('BadUserId', 'Invalid User ID'));
-const badPassword = next => sendHttpError(next, new RequestValidationError('BadPassword', 'Password missing or too short (must be at least 8 characters long)'));
+const badPassword = next => sendHttpError(next, new RequestValidationError('BadPassword', 'Password missing or too short (must be at least 6 characters long)'));
 const badAliases = next => sendHttpError(next, new RequestValidationError('BadAliases', 'Some of the aliases are invalid'));
 const badAlias = next => sendHttpError(next, new RequestValidationError('BadAlias', 'Invalid alias format, include type and value'));
 
@@ -100,6 +101,7 @@ module.exports = ({db, authdb, prefix, server}) => {
   };
 
   const sendProfileBack = (includePrivateDate, res, next) => (err, profile) => {
+    logger.debug({err, profile}, 'directory.router.sendProfileBack');
     if (err)
       return sendHttpError(next, err);
     res.json(includePrivateDate ? profile.private() : profile.public());
@@ -128,7 +130,7 @@ module.exports = ({db, authdb, prefix, server}) => {
   };
 
   const loginUser = (req, res, next) => {
-    const {id, password} = req.body;
+    const {id, token, password} = req.body;
 
     if (!id)
       return badUserId(next);
@@ -136,7 +138,7 @@ module.exports = ({db, authdb, prefix, server}) => {
     if (!password)
       return badPassword(next);
 
-    loginsUsers.login(id, password, (err, token) => {
+    loginsUsers.login(id, password, token, (err, token) => {
       if (err)
         return sendHttpError(next, err);
       res.json({id, token});
