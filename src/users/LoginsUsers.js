@@ -3,6 +3,7 @@
 const async = require('async');
 const crypto = require('crypto');
 const pbkdf = require('password-hash-and-salt');
+const verifyPassword = require('./verify-password');
 const Db = require('../db/db');
 const {UserNotFoundError, InvalidCredentialsError} = require('../errors');
 const config = require('../../config');
@@ -38,9 +39,10 @@ class LoginsUsers {
   login (userId, password, token, callback) {
     if (config.secret === password)
       return this.createToken(userId, token, callback);
+
     async.waterfall([
       (cb) => this.db.get(`id:${userId}`, cb),
-      (userDoc, cb) => pbkdf(password).verifyAgainst(userDoc.hash, cb),
+      (userDoc, cb) => verifyPassword(password, userDoc.hash, cb),
       (matches, cb) => {
         return matches
           ? this.createToken(userId, null, cb)
