@@ -2,20 +2,11 @@
 
 const bcrypt = require('bcrypt');
 const pbkdf = require('password-hash-and-salt');
+const {detectHash, hashes} = require('./detect-hash');
 
 const verifiers = {
-  bcrypt: (plain, hash, cb) => bcrypt.compare(plain, hash, cb),
-  pbkdf2: (plain, hash, cb) => pbkdf(plain).verifyAgainst(hash, cb)
-};
-
-const detectVerifier = (hash) => {
-  if (hash.startsWith('pbkdf2$'))
-    return verifiers.pbkdf2;
-
-  if (hash.startsWith('$2'))
-    return verifiers.bcrypt;
-
-  return null;
+  [hashes.bcrypt]: (plain, hash, cb) => bcrypt.compare(plain, hash, cb),
+  [hashes.pbkdf2]: (plain, hash, cb) => pbkdf(plain).verifyAgainst(hash, cb)
 };
 
 const wrapVerifierCallback = (cb) => (err, matches) => {
@@ -26,7 +17,7 @@ const wrapVerifierCallback = (cb) => (err, matches) => {
 
 // callback(err, matches: Boolean)
 module.exports = (plainText, hash, cb) => {
-  const verifier = detectVerifier(hash);
+  const verifier = verifiers[detectHash(hash)];
   const callback = wrapVerifierCallback(cb);
 
   if (!verifier)
