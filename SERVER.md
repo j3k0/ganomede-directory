@@ -25,9 +25,9 @@ A user has:
  * a list of **aliases**, each containing:
    * date **created**
    * a **type**
-   * a **value**
+   * a **value** (spaces are ignored)
    * a **public** status
- * a **hash** encoded password
+ * a **hash** encoded password (pbkdf2 or bcrypt)
  * a set of authentication **tokens**
    * each with an expiry date
 
