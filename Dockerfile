@@ -3,6 +3,11 @@ FROM node:6-slim
 EXPOSE 8000
 MAINTAINER Jean-Christophe Hoelt <hoelt@fovea.cc>
 
+# Install python
+RUN apt-get update \
+  && apt-get install -y make python g++ \
+  && rm -fr /var/lib/apt
+
 # Create 'app' user
 RUN useradd app -d /home/app
 
