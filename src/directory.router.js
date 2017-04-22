@@ -131,8 +131,8 @@ module.exports = ({db, authdb, prefix, server}) => {
   };
 
   const lookupWithAlias = (req, res, next) => {
-    const {type, value} = req.params;
-    value = value.replace(/ /g, '');
+    const {type} = req.params;
+    const value = req.params.value.replace(/ /g, '');
     return (type && value)
       ? findsProfiles.byAlias(type, value, sendProfileBack(req.ganomede.secretMatches, res, next))
       : badAlias(next);
