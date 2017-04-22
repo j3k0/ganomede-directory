@@ -13,6 +13,26 @@ describe('LoginsUsers', () => {
         done();
       });
     });
+
+    it('passes pbkdf2 hashes through as is', (done) => {
+      const inputHash = 'pbkdf2$10000$5786bea278988484b2ef02fffa2cbc759e4f20bfe3464f43e3b9e56356a09957ce2d77e78c743d7caad381a8818994d55c72e6543ab8a133958494436e997b79$8e8234c0675ec1af532f83acf9db08dec2e07ed425acbba3a53dff1f78921ccc021169312fc144109de1890c8f58b17745a8df250ab7f86cc13515e550dd79aa';
+
+      new LoginsUsers().hashPassword(inputHash, (err, hash) => {
+        expect(err).to.be.null;
+        expect(hash).to.equal(inputHash);
+        done();
+      });
+    });
+
+    it('passes bcrypt hashes through as is', (done) => {
+      const inputHash = '$2a$04$tjJzUHkOoR.xzyMTCDxfSu6Vq4NL1u3/9m2NT9bu7.ECODNEWi41K';
+
+      new LoginsUsers().hashPassword(inputHash, (err, hash) => {
+        expect(err).to.be.null;
+        expect(hash).to.equal(inputHash);
+        done();
+      });
+    });
   });
 
   describe('#createToken()', () => {

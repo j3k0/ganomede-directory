@@ -3,6 +3,7 @@
 const async = require('async');
 const crypto = require('crypto');
 const pbkdf = require('password-hash-and-salt');
+const {detectHash, hashes} = require('./detect-hash');
 const verifyPassword = require('./verify-password');
 const Db = require('../db/db');
 const {UserNotFoundError, InvalidCredentialsError} = require('../errors');
@@ -21,7 +22,9 @@ class LoginsUsers {
 
   // callback(err, hashString)
   hashPassword (password, callback) {
-    pbkdf(password).hash(callback);
+    return detectHash(password) === hashes.plainText
+      ? pbkdf(password).hash(callback)
+      : setImmediate(callback, null, password);
   }
 
   // callback(err, authTokenString)
