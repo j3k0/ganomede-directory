@@ -25,9 +25,9 @@ A user has:
  * a list of **aliases**, each containing:
    * date **created**
    * a **type**
-   * a **value**
+   * a **value** (spaces are ignored)
    * a **public** status
- * a **hash** encoded password
+ * a **hash** encoded password (pbkdf2 or bcrypt)
  * a set of authentication **tokens**
    * each with an expiry date
 
@@ -49,6 +49,8 @@ As such:
    * calls requiring the **auth token**.
  * all public calls (i.e. those not used for administration purpose) will expose the aliases as a map **type** &rArr; **value**.
    * the **value** exposed for each **type** is the last one that was added (based on the **created** property).
+
+On another note, keep in mind that all aliases values' spaces are removed.
 
 # Relations
 

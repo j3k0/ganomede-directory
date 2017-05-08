@@ -47,6 +47,10 @@ module.exports = ({db, authdb, prefix, server}) => {
     if (!validateAliases(aliases))
       return badAliases(next);
 
+    aliases.forEach((alias) => {
+      alias.value = alias.value.replace(/ /g, '');
+    });
+
     createsUsers.create(id, password, aliases, (err, json) => {
       if (err)
         return sendHttpError(next, err);
@@ -70,6 +74,10 @@ module.exports = ({db, authdb, prefix, server}) => {
   const addAliases = (userId, aliases, res, next) => {
     if (!validateAliases(aliases))
       return badAliases(next);
+
+    aliases.forEach((alias) => {
+      alias.value = alias.value.replace(/ /g, '');
+    });
 
     addsAliases.add(userId, aliases, (err) => {
       if (err)
@@ -123,7 +131,8 @@ module.exports = ({db, authdb, prefix, server}) => {
   };
 
   const lookupWithAlias = (req, res, next) => {
-    const {type, value} = req.params;
+    const {type} = req.params;
+    const value = req.params.value.replace(/ /g, '');
     return (type && value)
       ? findsProfiles.byAlias(type, value, sendProfileBack(req.ganomede.secretMatches, res, next))
       : badAlias(next);

@@ -65,8 +65,7 @@ describe('Profile', () => {
     });
   });
 
-  it('JSON.stringify(new Profile()) throws', () => {
-    const stringify = () => JSON.stringify(profile);
-    expect(stringify).to.throw('Can not convert Profile to JSON directly; use #public() or #private()');
+  it('JSON.stringify() and inspect only include public things', () => {
+    expect(JSON.parse(JSON.stringify(profile))).to.eql(profile.public());
   });
 });
