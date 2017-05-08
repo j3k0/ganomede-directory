@@ -46,7 +46,9 @@ class Profile {
   }
 
   toJSON () {
-    throw new Error('Can not convert Profile to JSON directly; use #public() or #private()');
+    // So we do not expose private data by accident (`res.json(profile)`).
+    // May still leak stuff on things like `util.inspect()` and `console.log()`.
+    return this.public();
   }
 }
 
