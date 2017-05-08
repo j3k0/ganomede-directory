@@ -50,6 +50,8 @@ As such:
  * all public calls (i.e. those not used for administration purpose) will expose the aliases as a map **type** &rArr; **value**.
    * the **value** exposed for each **type** is the last one that was added (based on the **created** property).
 
+On another note, keep in mind that all aliases values' spaces are removed.
+
 # Relations
 
  * For password hashing:
