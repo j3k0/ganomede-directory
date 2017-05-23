@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+/* eslint-disable no-console */
+'use strict';
+
+console.log(process.argv[2].slice(0,9) + '1');
