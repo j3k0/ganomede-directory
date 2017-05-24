@@ -42,7 +42,8 @@ const detectSuitable = (suggestions, callback) => {
 };
 
 const findSuggestion = (suggester, callback) => {
-  const batch = suggester.suggestMany(10);
+  const firstRun = suggester.digitsToAppend === 0;
+  const batch = suggester.suggestMany(firstRun ? 1 : 10);
 
   detectSuitable(batch, (err, item) => {
     if (err)
@@ -59,14 +60,9 @@ const main = ([username]) => {
   if (!username)
     throw new Error('Please specify username as first argument');
 
-  const dropLastSymbols = username.length + 1 > SuggestsUsernames.MAX_USERNAME_LENGTH
-    ? Math.abs(SuggestsUsernames.MAX_USERNAME_LENGTH - username.length - 1)
-    : 0;
-
-
-  const suggester = new SuggestsUsernames(username, {
-    dropLastSymbols,
-    digitsToAppend: 1
+  const suggester = new SuggestsUsernames(username.slice(0, SuggestsUsernames.MAX_USERNAME_LENGTH), {
+    dropLastSymbols: 0,
+    digitsToAppend: 0
   });
 
   findSuggestion(suggester, (err, suggestion) => {
