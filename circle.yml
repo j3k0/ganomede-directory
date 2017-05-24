@@ -1,10 +1,11 @@
 machine:
   node:
-    version: 6.9.4
+    version: 6.10.3
 
 test:
   pre:
     - npm run lint
+
   post:
     - npm run coverage
     - npm install https://github.com/nickmerwin/node-coveralls
