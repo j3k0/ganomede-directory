@@ -3,18 +3,23 @@
 
 const async = require('async');
 const tagizer = require('ganomede-tagizer');
+const {RestError} = require('restify');
 const Db = require('../src/db/db');
 const SuggestsUsernames = require('../src/users/SuggestsUsernames');
 const FindsProfiles = require('../src/users/FindsProfiles');
 const {UserNotFoundError} = require('../src/errors');
 const loggerMod = require('../src/logger');
+const {createClient} = require('../lib/client');
 const config = require('../config');
 
 const logger = loggerMod.child({stream: process.stderr});
 const findsProfiles = new FindsProfiles(new Db(config.couch));
+const apiClient = new createClient();
+
+const USE_PUBLIC_API = true;
 
 // callback(err, available: Boolean)
-const isTagAvailable = (userId, callback) => {
+const isTagAvailableDb = (userId, callback) => {
   const tag = tagizer.tag(userId);
 
   findsProfiles.byAlias('tag', tag, (err, profile) => {
@@ -32,6 +37,26 @@ const isTagAvailable = (userId, callback) => {
     callback(null, false);
   });
 };
+
+const isTagAvailableApi = (userId, callback) => {
+  const tag = tagizer.tag(userId);
+
+  apiClient.byAlias({type: 'tag', value: tag}, (err, stuff) => {
+    if (err && err instanceof RestError && err.statusCode === 404) {
+      logger.debug('Found winning userId `%s` due to `%s`; tag will be `%s`', userId, err.message, tag);
+      return callback(null, true);
+    }
+    else if (err)
+      return callback(err);
+
+    logger.debug('Tried userId `%s`, tag `%s` exists', userId, tag);
+    callback(null, false);
+  });
+};
+
+const isTagAvailable = USE_PUBLIC_API
+  ? isTagAvailableApi
+  : isTagAvailableDb;
 
 const detectSuitable = (suggestions, callback) => {
   async.detect(
