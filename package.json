@@ -10,7 +10,9 @@
     "coverage": "LOG_LEVEL=FATAL API_SECRET=12345678 istanbul cover _mocha -- -b tests/helper.js tests/**/*.test.js && istanbul report",
     "test": "LOG_LEVEL=FATAL API_SECRET=12345678 mocha --bail --no-exit --throw-deprecation tests/helper.js 'tests/**/*.test.js'",
     "testw": "nodemon --watch src/ --watch tests/ --watch config.js --exec \"npm test\"",
-    "lint": "eslint bin src tests index.js config.js"
+    "lint": "eslint bin src tests index.js config.js",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -46,6 +48,8 @@
     "nano": "^6.2.0",
     "password-hash-and-salt": "^0.1.4",
     "request": "^2.79.0",
-    "restify": "^4.1.1"
-  }
+    "restify": "^4.1.1",
+    "snyk": "^1.30.1"
+  },
+  "snyk": true
 }
