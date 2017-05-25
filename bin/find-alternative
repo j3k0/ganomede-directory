@@ -1,0 +1,105 @@
+#!/usr/bin/env node
+'use strict';
+
+const async = require('async');
+const tagizer = require('ganomede-tagizer');
+const {RestError} = require('restify');
+const Db = require('../src/db/db');
+const SuggestsUsernames = require('../src/users/SuggestsUsernames');
+const FindsProfiles = require('../src/users/FindsProfiles');
+const {UserNotFoundError} = require('../src/errors');
+const loggerMod = require('../src/logger');
+const {createClient} = require('../lib/client');
+const config = require('../config');
+
+const logger = loggerMod.child({stream: process.stderr});
+const findsProfiles = new FindsProfiles(new Db(config.couch));
+const apiClient = new createClient();
+
+const USE_PUBLIC_API = true;
+
+// callback(err, available: Boolean)
+const isTagAvailableDb = (userId, callback) => {
+  const tag = tagizer.tag(userId);
+
+  findsProfiles.byAlias('tag', tag, (err, profile) => {
+    if (err) {
+      if (err instanceof UserNotFoundError || err instanceof Db.DocumentNotFoundError) {
+        logger.debug('Found winning userId `%s` due to `%s`; tag will be `%s`', userId, err.constructor.name, tag);
+        return callback(null, true);
+      }
+      else {
+        return callback(err);
+      }
+    }
+
+    logger.debug('Tried userId `%s`, tag `%s` exists', userId, tag);
+    callback(null, false);
+  });
+};
+
+const isTagAvailableApi = (userId, callback) => {
+  const tag = tagizer.tag(userId);
+
+  apiClient.byAlias({type: 'tag', value: tag}, (err, stuff) => {
+    if (err && err instanceof RestError && err.statusCode === 404) {
+      logger.debug('Found winning userId `%s` due to `%s`; tag will be `%s`', userId, err.message, tag);
+      return callback(null, true);
+    }
+    else if (err)
+      return callback(err);
+
+    logger.debug('Tried userId `%s`, tag `%s` exists', userId, tag);
+    callback(null, false);
+  });
+};
+
+const isTagAvailable = USE_PUBLIC_API
+  ? isTagAvailableApi
+  : isTagAvailableDb;
+
+const detectSuitable = (suggestions, callback) => {
+  async.detect(
+    suggestions,
+    isTagAvailable,
+    callback
+  );
+};
+
+const findSuggestion = (suggester, callback) => {
+  const firstRun = suggester.digitsToAppend === 0;
+  const batch = suggester.suggestMany(firstRun ? 1 : 10);
+
+  detectSuitable(batch, (err, item) => {
+    if (err)
+      return callback(err);
+
+    if (!item)
+      return findSuggestion(suggester.nextSuggester(), callback);
+
+    callback(null, item);
+  });
+};
+
+const main = ([username]) => {
+  if (!username)
+    throw new Error('Please specify username as first argument');
+
+  const suggester = new SuggestsUsernames(username.slice(0, SuggestsUsernames.MAX_USERNAME_LENGTH), {
+    dropLastSymbols: 0,
+    digitsToAppend: 0
+  });
+
+  findSuggestion(suggester, (err, suggestion) => {
+    if (err) {
+      logger.error({err}, 'Failed to find suggestion');
+      return process.exit(2);
+    }
+
+    console.log(suggestion); // eslint-disable-line no-console
+    process.exit(0);
+  });
+};
+
+if (!module.parent)
+  main(process.argv.slice(2));

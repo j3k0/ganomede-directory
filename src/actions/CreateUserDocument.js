@@ -47,7 +47,7 @@ class CreateUserDocument extends BaseAction {
             return cb(err);
 
           this.result = response;
-          cb();
+          cb(null);
         });
       }
     ], callback);
