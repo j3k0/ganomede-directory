@@ -23,9 +23,13 @@ class CreatesUsers {
     ];
 
     new ActionsExecutor(steps).run((err) => {
-      return err
-        ? callback(err)
-        : callback(null, {id: userId});
+      if (err)
+        return callback(err);
+
+      callback(null, {
+        id: userId,
+        aliases: aliases.reduce((ref, {type, value}) => (ref[type] = value, ref), {})
+      });
     });
   }
 }
