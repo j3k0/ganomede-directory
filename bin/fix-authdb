@@ -1,0 +1,112 @@
+#!/usr/bin/env node
+'use strict';
+
+// When user is imported from Stormpath,
+// it could be that tag we want to assign him exists already.
+// So we use differnt user ID (./bin/find-alternative),
+// but since authdb tokne maps to old Stormpath username,
+// user will have to loging again. This script fixes that.
+//
+// See this GH issue for more details:
+// https://github.com/j3k0/ganomede-directory/issues/29
+
+const fs = require('fs');
+const path = require('path');
+const redis = require('redis');
+const async = require('async');
+const {createClient: createAuthDb} = require('authdb');
+const logger = require('../src/logger');
+const config = require('../config');
+
+const authdb = createAuthDb(config.authdb);
+const N_PARALLEL = 10e3; // read and possibly rename that much at a time.
+
+const hasOwn = (obj, key) => Object.hasOwnProperty.call(obj, key);
+
+const parseCsv = (fullPath) => {
+  return fs
+    .readFileSync(fullPath, 'utf8')
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line && !line.startsWith(';')) // ignore empty and comments
+    .reduce((self, line) => {
+      const [, oldUsername, newUsername] = line.split(',');
+      self[oldUsername] = newUsername;
+      return self;
+    }, Object.create(null));
+};
+
+const getKeys = (callback) => {
+  const client = redis.createClient(config.authdb);
+
+  client.keys('*', (err, keys) => {
+    client.quit();
+    logger.debug('Received %d keys', keys.length);
+    callback(err, keys);
+  });
+};
+
+const quit = (err) => {
+  const timeoutSeconds = 5;
+  authdb.redisClient.quit();
+  logger.debug('Exiting (%s) in %d seconds', err ? 'FAIL' : 'OK', timeoutSeconds);
+  if (err)
+    logger.error(err);
+  setTimeout(() => process.exit(err ? 1 : 0), timeoutSeconds * 1e3);
+};
+
+const rename = (token, account, newUsername, callback) => {
+  const newValue = Object.assign({}, account, {username: newUsername});
+
+  authdb.addAccount(token, newValue, (err) => {
+    if (err) {
+      logger.error({err, token, account, newUsername}, 'Failed to rename');
+      return callback(err);
+    }
+
+    logger.debug(`Renamed "${token}" from "${account.username}" to "${newUsername}"`);
+    callback(null);
+  });
+};
+
+const renameKeys = (renames) => (keys, callback) => {
+  const iter = (key, cb) => {
+    authdb.getAccount(key, (err, account) => {
+      if (err) {
+        logger.error({err, key, account}, 'Key errored');
+        return cb(err);
+      }
+
+      if (!account) {
+        logger.debug({key, account}, 'Key is null');
+        return cb(null);
+      }
+
+      if (!account.username) {
+        logger.debug({key, account}, 'Key has no username');
+        return cb(null);
+      }
+
+      return hasOwn(renames, account.username)
+        ? rename(key, account, renames[account.username], cb)
+        : cb(null);
+    });
+  };
+
+  async.eachLimit(keys, N_PARALLEL, iter, callback);
+};
+
+const main = ([csvPath]) => {
+  const fullPath = path.resolve(process.cwd(), csvPath);
+  const renames = parseCsv(fullPath);
+
+  logger.debug('Read %d renames', Object.keys(renames).length);
+
+  async.waterfall([
+    getKeys,
+    renameKeys(renames)
+  ], quit);
+};
+
+if (!module.parent)
+  main(process.argv.slice(2));

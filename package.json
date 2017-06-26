@@ -47,6 +47,7 @@
     "lodash": "^4.17.2",
     "nano": "^6.2.0",
     "password-hash-and-salt": "^0.1.4",
+    "redis": "^2.7.1",
     "request": "^2.79.0",
     "restify": "^4.1.1",
     "snyk": "^1.30.1"
