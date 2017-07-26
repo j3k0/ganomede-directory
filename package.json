@@ -46,6 +46,7 @@
     "ganomede-tagizer": "^2.0.0",
     "lodash": "^4.17.2",
     "nano": "^6.2.0",
+    "node-statsd": "^0.1.1",
     "password-hash-and-salt": "^0.1.4",
     "redis": "^2.7.1",
     "request": "^2.79.0",

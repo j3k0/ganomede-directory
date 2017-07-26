@@ -57,6 +57,10 @@ module.exports = () => {
   }
   server.use(setRequestId);
 
+  // Send audit statistics
+  const sendAuditStats = require('./send-audit-stats');
+  server.on('after', sendAuditStats);
+
   // Init object to dump our stuff into.
   server.use((req, res, next) => {
     req.ganomede = {
