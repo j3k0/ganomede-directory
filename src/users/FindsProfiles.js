@@ -5,7 +5,7 @@
 
 const async = require('async');
 const BuildsProfiles = require('./BuildsProfiles');
-const {InvalidAuthTokenError} = require('../errors');
+const {InvalidAuthTokenError, AliasNotFoundError} = require('../errors');
 const logger = require('../logger');
 
 class FindsProfiles {
@@ -41,11 +41,11 @@ class FindsProfiles {
 
   byAlias (type, value, callback) {
     async.waterfall([
-      (cb) => this.db.get(`alias:${type}:${value}`, cb),
+      (cb) => this.db.nullableGet(`alias:${type}:${value}`, cb),
       (doc, cb) => {
-        return doc
+        return doc !== null
           ? this.byUserId(doc.id, cb)
-          : cb(new Error('NotFound'));
+          : cb(new AliasNotFoundError(type, value));
       }
     ], callback);
   }

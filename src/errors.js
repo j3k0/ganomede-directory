@@ -3,6 +3,7 @@
 const util = require('util');
 const restify = require('restify');
 const logger = require('./logger');
+const {upperFirst} = require('lodash');
 
 // The way to distinguish our app's logic-level errors from others.
 // (Like `socket hang up` vs `user already exists`.)
@@ -84,6 +85,15 @@ class AliasAlreadyExistsError extends BaseError {
   }
 }
 
+class AliasNotFoundError extends BaseError {
+  constructor (type, value) {
+    super('Alias not found %j', {[type]: value});
+    this.statusCode = 404;
+    this.severity = 'info';
+    this.name = `${upperFirst(type)}NotFoundError`;
+  }
+}
+
 class UserNotFoundError extends BaseError {
   constructor (userId) {
     super('User not found %j', {userId});
@@ -159,6 +169,7 @@ module.exports = {
   BaseError,
   UserAlreadyExistsError,
   AliasAlreadyExistsError,
+  AliasNotFoundError,
   UserNotFoundError,
   InvalidAuthTokenError,
   InvalidCredentialsError,
